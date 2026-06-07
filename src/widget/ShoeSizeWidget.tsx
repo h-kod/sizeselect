@@ -18,8 +18,8 @@ const SIZE_OPTIONS = {
 }
 const TARGET_BRANDS = ['Nike','Adidas','Puma','New Balance'] as const
 
-export default function ShoeSizeWidget({targetBrand}:{targetBrand:string}){
-  const [open,setOpen] = useState(false)
+export default function ShoeSizeWidget({targetBrand, initialOpen = false}:{targetBrand:string; initialOpen?: boolean}){
+  const [open,setOpen] = useState(initialOpen)
   const [fromBrand,setFromBrand] = useState('Adidas')
   const [system,setSystem] = useState<'EU'|'US'|'UK'|'CM'>('EU')
   const [value,setValue] = useState('42')
@@ -80,14 +80,19 @@ export default function ShoeSizeWidget({targetBrand}:{targetBrand:string}){
 
   return (
     <div className="ssw-widget">
-      {!open && (
-        <div className="ssw-trigger-container">
-          <button type="button" className="ssw-trigger" onClick={()=>{setOpen(true); console.log('event','widget_opened')}}>
-            Bedenimi Bul
-          </button>
-        </div>
-      )}
-      <Drawer open={open} onClose={()=>{setOpen(false); console.log('event','widget_closed')}}>
+      <div className="ssw-trigger-container">
+        <button
+          type="button"
+          className={`ssw-trigger ${open ? 'active' : ''}`}
+          onClick={() => {
+            setOpen(prev => !prev)
+            console.log('event', open ? 'widget_closed' : 'widget_opened')
+          }}
+        >
+          Bedenimi Bul
+        </button>
+      </div>
+      <Drawer open={open} onClose={() => { setOpen(false); console.log('event','widget_closed') }}>
         <div className="ssw-stepper">
           <span className="ssw-step active">1. Marka</span>
           <span className="ssw-step">2. Beden</span>

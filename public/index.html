@@ -99,6 +99,32 @@
         color: #0f172a;
         padding: 0.92rem 1.05rem;
       }
+      .demo-widget-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(90deg, #10b981, #059669);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 1.1rem 1.4rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(16, 185, 129, 0.25);
+        transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+        margin-top: 12px;
+        width: 100%;
+      }
+      .demo-widget-button:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+        box-shadow: 0 16px 36px rgba(16, 185, 129, 0.35);
+      }
+      .demo-widget-button:active {
+        transform: translateY(0);
+      }
       .embed-card {
         margin-top: 24px;
         display: grid;
@@ -157,6 +183,7 @@
               <option>44</option>
             </select>
           </div>
+          <button id="demo-open-widget" class="demo-widget-button" type="button" onclick="if(window.openShoeSizeWidget)window.openShoeSizeWidget()">Bedenimi Bul</button>
         </article>
       </section>
 

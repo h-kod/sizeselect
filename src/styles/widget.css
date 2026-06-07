@@ -5,10 +5,11 @@
 .ssw-drawer.open{transform:translateX(0)}
 .ssw-header{padding:22px 22px 18px;border-bottom:1px solid rgba(148,163,184,0.16);background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:2}
 .ssw-header-row{display:flex;justify-content:space-between;align-items:center;gap:14px}
-.ssw-widget{display:inline-flex}
+.ssw-widget{display:block}
 .ssw-trigger-container{margin-top:12px;display:flex;justify-content:flex-end}
-.ssw-trigger{border:none;border-radius:999px;padding:0.95rem 1.3rem;font-size:0.95rem;font-weight:700;background:linear-gradient(90deg,#2563eb,#0f4bcb);color:#fff;cursor:pointer;box-shadow:0 14px 32px rgba(37,99,235,0.18);transition:transform .16s ease,filter .16s ease}
+.ssw-trigger{border:none;border-radius:999px;padding:0.95rem 1.3rem;font-size:0.95rem;font-weight:700;background:linear-gradient(90deg,#2563eb,#0f4bcb);color:#fff;cursor:pointer;box-shadow:0 14px 32px rgba(37,99,235,0.18);transition:transform .16s ease,filter .16s ease,opacity .16s ease}
 .ssw-trigger:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.ssw-trigger.active{opacity:0.95;box-shadow:0 12px 28px rgba(37,99,235,0.22)}
 .ssw-title{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:-0.02em;color:#0f172a}
 .ssw-subtitle{margin:8px 0 0;color:#475569;font-size:0.92rem;max-width:100%;line-height:1.6}
 .ssw-body{padding:24px 24px 190px;overflow:auto;flex:1;display:grid;gap:18px;overscroll-behavior:contain}

@@ -16,13 +16,14 @@ interface WidgetConfig {
   buttonTextColor: string
   borderRadius: string
   language: string
-  behavior: string
   stylePreset: string
   sizeSelector: string
   cartSelector: string
+  showAddToCart: string
+  showSelectSize: string
 }
 
-function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, openOnMount = false) {
+function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, openOnMount = false, initialStep = 1) {
   // Create wrapper
   const host = document.createElement('div')
   host.dataset.sswHost = 'true'
@@ -62,11 +63,13 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
       targetModel: config.model || '',
       targetSizeSystem: config.sizeSystem || 'EU',
       languageMode: config.language || 'auto',
-      ctaBehavior: config.behavior || 'select',
       stylePreset: config.stylePreset || 'modern',
       sizeSelector: config.sizeSelector || '',
       cartSelector: config.cartSelector || '',
-      initialOpen: openOnMount
+      showAddToCart: config.showAddToCart || 'true',
+      showSelectSize: config.showSelectSize || 'true',
+      initialOpen: openOnMount,
+      initialStep: initialStep
     })
   )
   mounted = true
@@ -100,15 +103,31 @@ function openWidget() {
 }
 
 function reInit(openOnMount = false) {
+  let wasOpen = openOnMount
+  let lastStep = 1
   if (currentTarget) {
     const host = currentTarget.querySelector('[data-ssw-host]')
+    if (host && host.shadowRoot) {
+      const drawer = host.shadowRoot.querySelector('.ssw-drawer')
+      if (drawer && drawer.classList.contains('open')) {
+        wasOpen = true
+      }
+      const activeStepEl = host.shadowRoot.querySelector('.ssw-step.active')
+      if (activeStepEl) {
+        const steps = Array.from(host.shadowRoot.querySelectorAll('.ssw-step'))
+        const idx = steps.indexOf(activeStepEl)
+        if (idx !== -1) {
+          lastStep = idx + 1
+        }
+      }
+    }
     if (host) host.remove()
   }
   mounted = false
-  init(openOnMount)
+  init(wasOpen, lastStep)
 }
 
-function init(openOnMount = false) {
+function init(openOnMount = false, initialStep = 1) {
   // Avoid double mounting
   if (mounted && document.querySelector('[data-ssw-host]')) return
 
@@ -130,10 +149,11 @@ function init(openOnMount = false) {
   const buttonTextColor = target.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
   const borderRadius = target.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
   const language = target.getAttribute('data-language') || scriptDataset.language || 'auto'
-  const behavior = target.getAttribute('data-behavior') || scriptDataset.behavior || 'select'
   const stylePreset = target.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
   const sizeSelector = target.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
   const cartSelector = target.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
+  const showAddToCart = target.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
+  const showSelectSize = target.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
 
   const config: Partial<WidgetConfig> = {
     storeId,
@@ -145,14 +165,15 @@ function init(openOnMount = false) {
     buttonTextColor,
     borderRadius,
     language,
-    behavior,
     stylePreset,
     sizeSelector,
-    cartSelector
+    cartSelector,
+    showAddToCart,
+    showSelectSize
   }
 
   try {
-    injectIntoShadow(target, config, openOnMount)
+    injectIntoShadow(target, config, openOnMount, initialStep)
   } catch (error) {
     console.error('ShoeFitWidget injection failed:', error)
   }
@@ -164,7 +185,7 @@ function init(openOnMount = false) {
 
 // Initialize on page load
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => init())
+  document.addEventListener('DOMContentLoaded', () => init(true))
 } else {
-  init()
+  init(true)
 }

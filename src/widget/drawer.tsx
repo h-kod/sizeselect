@@ -24,7 +24,6 @@ export default function Drawer({ open, onClose, title, subtitle, stylePreset = '
 
   return (
     <div>
-      {open && <div className="ssw-overlay" onClick={onClose} />}
       <aside
         ref={ref}
         className={`ssw-drawer${open ? ' open' : ''}`}
@@ -40,9 +39,6 @@ export default function Drawer({ open, onClose, title, subtitle, stylePreset = '
               <p className="ssw-title">{title}</p>
               <p className="ssw-subtitle">{subtitle}</p>
             </div>
-            <button type="button" className="ssw-close-btn" onClick={onClose} aria-label="Close">
-              ×
-            </button>
           </div>
         </header>
         <div className="ssw-body">{children}</div>

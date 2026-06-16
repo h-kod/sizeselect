@@ -11,10 +11,11 @@ interface ShoeSizeWidgetProps {
   targetModel: string
   targetSizeSystem: string
   languageMode: string
-  ctaBehavior: string
   stylePreset: string
   sizeSelector?: string
   cartSelector?: string
+  showAddToCart?: string
+  showSelectSize?: string
   initialOpen?: boolean
 }
 
@@ -157,14 +158,16 @@ export default function ShoeSizeWidget({
   targetModel,
   targetSizeSystem,
   languageMode,
-  ctaBehavior,
   stylePreset,
   sizeSelector,
   cartSelector,
-  initialOpen = false
+  showAddToCart = 'true',
+  showSelectSize = 'true',
+  initialStep = 1
 }: ShoeSizeWidgetProps) {
-  const [open, setOpen] = useState(initialOpen)
-  const [currentStep, setCurrentStep] = useState(1)
+  const open = true
+  const setOpen = (val: boolean) => {}
+  const [currentStep, setCurrentStep] = useState(initialStep)
 
   // Language setup
   const lang = useMemo(() => {
@@ -192,15 +195,18 @@ export default function ShoeSizeWidget({
   const [cabinetImgErrors, setCabinetImgErrors] = useState<Record<string, boolean>>({})
 
   // Target elements detection
-  const [showSelectSize, setShowSelectSize] = useState(true)
-  const [showAddToCart, setShowAddToCart] = useState(true)
+  const [showSelectSizeBtn, setShowSelectSizeBtn] = useState(true)
+  const [showAddToCartBtn, setShowAddToCartBtn] = useState(true)
 
   useEffect(() => {
     if (open) {
-      setShowSelectSize(canSelectSize(sizeSelector))
-      setShowAddToCart(canAddToCart(cartSelector))
+      const isSizeSelectorSet = sizeSelector && sizeSelector.trim() !== '';
+      const isCartSelectorSet = cartSelector && cartSelector.trim() !== '';
+
+      setShowSelectSizeBtn(showSelectSize === 'true' && isSizeSelectorSet ? canSelectSize(sizeSelector) : false)
+      setShowAddToCartBtn(showAddToCart === 'true' && isCartSelectorSet ? canAddToCart(cartSelector) : false)
     }
-  }, [open, sizeSelector, cartSelector])
+  }, [open, sizeSelector, cartSelector, showSelectSize, showAddToCart])
 
   // Fetch unique brands from remote repositories redundantly (fallback execution)
   useEffect(() => {
@@ -358,7 +364,10 @@ export default function ShoeSizeWidget({
 
     if (isSuccess || addedToCart) {
       setSuccessMsg(t.successSelect)
-      setTimeout(() => setSuccessMsg(''), 3000)
+      setTimeout(() => {
+        setSuccessMsg('')
+        setOpen(false)
+      }, 1500)
     } else {
       alert(`${t.recommendedTitle}: EU ${recStr}`)
     }
@@ -400,7 +409,10 @@ export default function ShoeSizeWidget({
 
     if (isSuccess) {
       setSuccessMsg(t.successSelectOnly)
-      setTimeout(() => setSuccessMsg(''), 3000)
+      setTimeout(() => {
+        setSuccessMsg('')
+        setOpen(false)
+      }, 1500)
     } else {
       alert(`${t.recommendedTitle}: EU ${recStr}`)
     }
@@ -444,25 +456,10 @@ export default function ShoeSizeWidget({
     setMeasuredCm(undefined)
   }
 
-  const showCloseBtn = !showSelectSize && !showAddToCart
+  const showCloseBtn = !showSelectSizeBtn && !showAddToCartBtn
 
   return (
     <div className="ssw-widget">
-      {/* Widget Trigger Button */}
-      <div className="ssw-trigger-container">
-        <button type="button" className="ssw-trigger" onClick={handleOpenDrawer}>
-          <svg
-            className="ssw-trigger-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-          >
-            <path d="M3 6h18M3 12h18M3 18h18" />
-          </svg>
-          {t.start}
-        </button>
-      </div>
 
       {/* Slide-out Drawer */}
       <Drawer
@@ -540,44 +537,50 @@ export default function ShoeSizeWidget({
               
               {/* Vertical Scrollable Brand List */}
               <div className="ssw-brand-list">
-                {filteredBrands.map(brand => {
-                  const domain = getBrandDomain(brand)
-                  const errorKey = `${brand}_list_logo`
-                  const hasError = cabinetImgErrors[errorKey]
-                  const logoSrc = hasError 
-                    ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
-                    : `https://logo.clearbit.com/${domain}`
+                {filteredBrands.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '24px 12px', color: '#64748b', fontSize: '0.85rem' }}>
+                    {lang === 'tr' ? 'Aradığınız marka bulunamadı.' : 'No matching brands found.'}
+                  </div>
+                ) : (
+                  filteredBrands.map(brand => {
+                    const domain = getBrandDomain(brand)
+                    const errorKey = `${brand}_list_logo`
+                    const hasError = cabinetImgErrors[errorKey]
+                    const logoSrc = hasError 
+                      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+                      : `https://logo.clearbit.com/${domain}`
 
-                  const isSelected = refBrand === brand
-                  const meta = (brandMeta as any)[brand]
-                  
-                  return (
-                    <button
-                      key={brand}
-                      type="button"
-                      className={`ssw-brand-row-item ${isSelected ? 'active' : ''}`}
-                      onClick={() => {
-                        setRefBrand(brand)
-                        setCurrentStep(2)
-                        dispatchEvent('brand_selected', { brand })
-                      }}
-                    >
-                      <img
-                        className="ssw-brand-row-logo"
-                        src={logoSrc}
-                        alt={brand}
-                        onError={() => {
-                          setCabinetImgErrors(prev => ({ ...prev, [errorKey]: true }))
+                    const isSelected = refBrand === brand
+                    const meta = (brandMeta as any)[brand]
+                    
+                    return (
+                      <button
+                        key={brand}
+                        type="button"
+                        className={`ssw-brand-row-item ${isSelected ? 'active' : ''}`}
+                        onClick={() => {
+                          setRefBrand(brand)
+                          setCurrentStep(2)
+                          dispatchEvent('brand_selected', { brand })
                         }}
-                      />
-                      <div className="ssw-brand-row-info">
-                        <strong>{brand}</strong>
-                        <small>{lang === 'tr' ? (meta?.caption || 'Standard kalıp') : 'Size reference brand'}</small>
-                      </div>
-                      <span className="ssw-brand-row-arrow">→</span>
-                    </button>
-                  )
-                })}
+                      >
+                        <img
+                          className="ssw-brand-row-logo"
+                          src={logoSrc}
+                          alt={brand}
+                          onError={() => {
+                            setCabinetImgErrors(prev => ({ ...prev, [errorKey]: true }))
+                          }}
+                        />
+                        <div className="ssw-brand-row-info">
+                          <strong>{brand}</strong>
+                          <small>{lang === 'tr' ? (meta?.caption || 'Standard kalıp') : 'Size reference brand'}</small>
+                        </div>
+                        <span className="ssw-brand-row-arrow">→</span>
+                      </button>
+                    )
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -804,7 +807,7 @@ export default function ShoeSizeWidget({
             {successMsg && <div className="ssw-toast ssw-fade-in">{successMsg}</div>}
 
             <div className="ssw-results-footer" style={{ marginTop: '20px' }}>
-              {showAddToCart && (
+              {showAddToCartBtn && (
                 <button
                   type="button"
                   className="ssw-button ssw-button-full"
@@ -814,11 +817,11 @@ export default function ShoeSizeWidget({
                 </button>
               )}
 
-              {showSelectSize && (
+              {showSelectSizeBtn && (
                 <button
                   type="button"
                   className="ssw-button ssw-button-full"
-                  style={{ marginTop: showAddToCart ? '10px' : '0px', backgroundColor: '#334155', color: '#fff', border: 'none' }}
+                  style={{ marginTop: showAddToCartBtn ? '10px' : '0px', backgroundColor: '#334155', color: '#fff', border: 'none' }}
                   onClick={handleSelectSizeOnly}
                 >
                   {t.selectOnlySizeBtn}

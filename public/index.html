@@ -1023,7 +1023,7 @@
 
         <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center; width: 100%;">
           <button class="store-btn-cart" type="button" style="flex: 1; margin-top: 0;" onclick="alert('Sepete Eklendi!')">Sepete Ekle</button>
-          <button class="store-btn-shoefit" type="button" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.15); height: 42px; transition: transform 0.15s ease;" onclick="scrollToSidebar()">
+          <button id="preview-shoefit-btn" class="store-btn-shoefit" type="button" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.15); height: 42px; transition: transform 0.15s ease;" onclick="scrollToSidebar()">
             👟 Bedenimi Bul
           </button>
         </div>
@@ -1249,6 +1249,15 @@ s.onload = () => window.ShoeFitWidget.init({
             host.style.setProperty('--ssw-text-on-primary', textColor);
             host.style.setProperty('--ssw-radius', radius + 'px');
           }
+        }
+
+        // Preview butonu güncelle
+        const previewBtn = document.getElementById('preview-shoefit-btn');
+        if (previewBtn) {
+          previewBtn.style.background = color;
+          previewBtn.style.color = textColor;
+          previewBtn.style.borderRadius = radius + 'px';
+          previewBtn.style.boxShadow = `0 4px 10px ${color}40`;
         }
 
         if (onlyStyle) {

@@ -4,3 +4,18 @@
 
 [dev]
   command = "npm run dev"
+
+[[headers]]
+  for = "/shoe-size-widget.js"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Access-Control-Allow-Headers = "*"
+    Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "/shoe-size-widget.umd.cjs"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Content-Type = "application/javascript; charset=utf-8"

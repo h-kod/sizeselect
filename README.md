@@ -1,51 +1,78 @@
-# Shoe Size Widget
+# ShoeFit Widget
 
-Bu proje, üçüncü taraf e-ticaret sayfalarına yerleştirilebilen bir ayakkabı numarası asistanı widget'ıdır. Netlify için hazır ve root dizinden doğrudan kopyalanabilir bir JS dosyası sunar.
+E-ticaret sitelerine tek script ile entegre edilen ayakkabı beden asistanı.  
+Kullanıcı "Bedenimi Bul" butonuna tıklar → sidebar açılır → beden öneri akışı çalışır.
 
-## Özellikler
+**Demo:** [sizeselect-ecommerce.netlify.app](https://sizeselect-ecommerce.netlify.app)
 
-- React + TypeScript widget
-- Shadow DOM ile stil izolasyonu
-- `shoe-size-widget.js` olarak build edilebilir
-- Netlify deploy için `dist/` klasörünü publish eder
-- Basit embed kodu ile başka sayfalara entegre edilir
+---
 
-## Yerel geliştirme
+## Entegrasyon
+
+### Yöntem 1 — HTML Script Tag
+
+Sitenin `<body>` kapanış etiketinden önce ekle:
+
+```html
+<script
+  src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js"
+  data-store-id="STORE_1"
+  data-brand="Nike"
+  data-target-selector=".add-to-cart-btn"
+  data-insert-position="after"
+  data-button-color="#2563eb"
+  data-language="auto"
+  async>
+</script>
+```
+
+`data-target-selector` → "Bedenimi Bul" butonunun ekleneceği elementin CSS seçicisi (**zorunlu**).
+
+### Yöntem 2 — Tarayıcı Konsolundan Test
+
+```js
+const s = document.createElement('script');
+s.type = 'module';
+s.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
+document.head.appendChild(s);
+
+s.onload = () => window.ShoeFitWidget.init({
+  targetSelector: '.add-to-cart-btn',
+  insertPosition: 'after',
+  brand: 'Nike',
+  buttonColor: '#2563eb',
+  language: 'auto'
+});
+```
+
+---
+
+## Tüm Parametreler
+
+| Parametre | Açıklama | Varsayılan |
+|---|---|---|
+| `data-target-selector` | Butonun ekleneceği element | — (**zorunlu**) |
+| `data-insert-position` | `after` veya `before` | `after` |
+| `data-brand` | Hedef ayakkabı markası | `Nike` |
+| `data-store-id` | Mağaza ID | `STORE_1` |
+| `data-button-color` | Buton rengi (hex) | `#2563eb` |
+| `data-button-text-color` | Buton yazı rengi | `#ffffff` |
+| `data-border-radius` | Köşe yuvarlama | `16px` |
+| `data-language` | `tr`, `en`, `auto` | `auto` |
+| `data-style-preset` | `modern`, `glass`, `carbon`, `playful`, `cyberpunk`, `retro` | `modern` |
+| `data-size-selector` | Beden seçici elementi CSS | — |
+| `data-cart-selector` | Sepete ekle butonu CSS | — |
+| `data-show-add-to-cart` | `true` / `false` | `true` |
+| `data-show-select-size` | `true` / `false` | `true` |
+
+---
+
+## Geliştirme
 
 ```bash
 npm install
-npm run dev
+npm run dev      # localhost:5173
+npm run build    # dist/ klasörüne üretir
 ```
 
-`http://localhost:5173` adresinde demo sayfa açılır.
-
-## Yapı ve deploy
-
-```bash
-npm run build
-```
-
-Bu komut `dist/` klasörüne widget JS dosyasını ve `public/index.html` demo sayfasını çıkarır.
-
-## Netlify kurulumu
-
-1. Projeyi bir Git deposuna push et.
-2. Netlify'a bağla.
-3. Aşağıdaki ayarları kullan:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-
-### Netlify'da embed kodu
-
-Netlify deploy sonrası widget şu adreste sunulur:
-
-```html
-<script type="module" src="https://your-site.netlify.app/shoe-size-widget.js" data-brand="Nike" data-product-category="sneaker" data-position="after-size-selector"></script>
-```
-
-`your-site.netlify.app` kısmını kendi site adresinle değiştir.
-
-## Notlar
-
-- `netlify.toml` dosyası Netlify build ayarlarını içerir.
-- `public/index.html` static demo sayfasıdır ve deploy edildiğinde doğrudan açılabilir.
+Merchant Panel (demo + embed kodu üretici): `http://localhost:5173`

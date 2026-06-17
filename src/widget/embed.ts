@@ -21,6 +21,8 @@ interface WidgetConfig {
   cartSelector: string
   showAddToCart: string
   showSelectSize: string
+  targetSelector: string
+  insertPosition: string
 }
 
 function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, openOnMount = false, initialStep = 1) {
@@ -29,7 +31,9 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
   host.dataset.sswHost = 'true'
   host.style.display = 'block'
   host.style.width = '100%'
-  host.style.marginTop = '14px'
+  if (config.storeId === 'STORE_DEMO') {
+    host.setAttribute('data-is-demo', 'true')
+  }
 
   // Apply theme variables to host
   const primaryColor = config.buttonColor || '#2563eb'
@@ -51,7 +55,22 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
   // Mount point
   const mount = document.createElement('div')
   shadow.appendChild(mount)
-  rootEl.appendChild(host)
+
+  // Inject host into page based on configuration
+  if (config.storeId === 'STORE_DEMO' || rootEl === document.body) {
+    rootEl.appendChild(host)
+  } else {
+    const parent = rootEl.parentNode
+    if (parent) {
+      if (config.insertPosition === 'before') {
+        parent.insertBefore(host, rootEl)
+      } else {
+        parent.insertBefore(host, rootEl.nextSibling)
+      }
+    } else {
+      rootEl.appendChild(host)
+    }
+  }
 
   // Render React App
   const root = createRoot(mount)
@@ -75,7 +94,17 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
   mounted = true
 }
 
-function findInsertTarget() {
+function findInsertTarget(targetSelector?: string) {
+  // Try to find target selector configured
+  if (targetSelector) {
+    try {
+      const el = document.querySelector(targetSelector)
+      if (el) return el as HTMLElement
+    } catch (e) {
+      console.warn('[ShoeFit] Invalid target selector syntax:', targetSelector, e)
+    }
+  }
+
   // Try to find the developer-configured container element
   const container = document.getElementById('shoefit-widget')
   if (container) return container
@@ -83,30 +112,24 @@ function findInsertTarget() {
   // Fallback to searching for size selects on the page
   const selectors = ['select[name*="size"]', 'select[id*="size"]', 'select']
   for (const selector of selectors) {
-    const el = document.querySelector(selector)
-    if (el && el.parentElement) return el.parentElement
+    try {
+      const el = document.querySelector(selector)
+      if (el && el.parentElement) return el.parentElement as HTMLElement
+    } catch {}
   }
 
   return document.body
 }
 
 function openWidget() {
-  if (!currentTarget) return
-  const host = currentTarget.querySelector('[data-ssw-host]') as HTMLElement | null
-  const trigger = host?.shadowRoot?.querySelector<HTMLButtonElement>('.ssw-trigger')
-  if (trigger) {
-    trigger.click()
-  } else {
-    // If not mounted yet, mount it open
-    init(true)
-  }
+  window.dispatchEvent(new CustomEvent('shoefit_open_widget'))
 }
 
 function reInit(openOnMount = false) {
   let wasOpen = openOnMount
   let lastStep = 1
   if (currentTarget) {
-    const host = currentTarget.querySelector('[data-ssw-host]')
+    const host = currentTarget.querySelector('[data-ssw-host]') || document.querySelector('[data-ssw-host]')
     if (host && host.shadowRoot) {
       const drawer = host.shadowRoot.querySelector('.ssw-drawer')
       if (drawer && drawer.classList.contains('open')) {
@@ -131,29 +154,35 @@ function init(openOnMount = false, initialStep = 1) {
   // Avoid double mounting
   if (mounted && document.querySelector('[data-ssw-host]')) return
 
-  const target = findInsertTarget()
+  // Gather config parameters from script and div container
+  const script = (document.currentScript as HTMLScriptElement | null) ||
+                 (document.querySelector('script[src*="shoe-size-widget"]') as HTMLScriptElement | null)
+  const scriptDataset = script?.dataset || {}
+
+  // Check target-selector
+  const divContainer = document.getElementById('shoefit-widget')
+  const targetSelector = divContainer?.getAttribute('data-target-selector') || scriptDataset.targetSelector || ''
+  const insertPosition = divContainer?.getAttribute('data-insert-position') || scriptDataset.insertPosition || 'after'
+
+  const target = findInsertTarget(targetSelector)
   if (!target) return
   currentTarget = target
 
-  // Gather config parameters from script and div container
-  const script = document.currentScript as HTMLScriptElement | null
-  const scriptDataset = script?.dataset || {}
-
   // Preference order: 1. Div container attributes, 2. Script attributes, 3. Defaults
-  const storeId = target.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
-  const productId = target.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
-  const brand = target.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
-  const model = target.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
-  const sizeSystem = target.getAttribute('data-size-system') || scriptDataset.sizeSystem || 'EU'
-  const buttonColor = target.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
-  const buttonTextColor = target.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
-  const borderRadius = target.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
-  const language = target.getAttribute('data-language') || scriptDataset.language || 'auto'
-  const stylePreset = target.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
-  const sizeSelector = target.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
-  const cartSelector = target.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
-  const showAddToCart = target.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
-  const showSelectSize = target.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
+  const storeId = divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
+  const productId = divContainer?.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
+  const brand = divContainer?.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
+  const model = divContainer?.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
+  const sizeSystem = divContainer?.getAttribute('data-size-system') || scriptDataset.sizeSystem || 'EU'
+  const buttonColor = divContainer?.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
+  const buttonTextColor = divContainer?.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
+  const borderRadius = divContainer?.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
+  const language = divContainer?.getAttribute('data-language') || scriptDataset.language || 'auto'
+  const stylePreset = divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
+  const sizeSelector = divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
+  const cartSelector = divContainer?.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
+  const showAddToCart = divContainer?.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
+  const showSelectSize = divContainer?.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
 
   const config: Partial<WidgetConfig> = {
     storeId,
@@ -169,7 +198,9 @@ function init(openOnMount = false, initialStep = 1) {
     sizeSelector,
     cartSelector,
     showAddToCart,
-    showSelectSize
+    showSelectSize,
+    targetSelector,
+    insertPosition
   }
 
   try {

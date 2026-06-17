@@ -782,6 +782,22 @@
                 <span style="font-size: 0.7rem; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Bağlantıyı Sağlar</span>
               </h4>
 
+              <div class="form-row" style="margin-bottom: 16px;">
+                <div class="form-group">
+                  <label for="opt-target-selector" style="color: #f87171;">* Beden Tablosu Hedef Element CSS Seçicisi (Zorunlu)</label>
+                  <input type="text" id="opt-target-selector" class="form-control" style="border-color: rgba(248, 113, 113, 0.4);" placeholder="Örn: .store-btn-cart" oninput="validateAndUpdate();" />
+                  <span id="target-selector-error" style="color: #f87171; font-size: 0.75rem; margin-top: 4px; display: none;">Lütfen hedef element seçicisini doldurun.</span>
+                </div>
+                <div class="form-group">
+                  <label>Ekleme Konumu</label>
+                  <div class="btn-group-toggle" id="group-insert-position">
+                    <button type="button" class="btn-toggle active" data-value="after" onclick="setToggleOption('insert-position', 'after'); validateAndUpdate();">Sonrasına Ekle (After)</button>
+                    <button type="button" class="btn-toggle" data-value="before" onclick="setToggleOption('insert-position', 'before'); validateAndUpdate();">Öncesine Ekle (Before)</button>
+                  </div>
+                  <input type="hidden" id="opt-insert-position" value="after" />
+                </div>
+              </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label for="opt-size-selector">Özel Beden Seçici (Size Selector) CSS</label>
@@ -793,18 +809,26 @@
                 </div>
               </div>
 
-              <div class="form-group" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 10px; margin-top: 12px; margin-bottom: 0;">
-                <label style="color: #3b82f6; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.82rem;">
+              <div class="form-group" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 10px; margin-top: 12px; margin-bottom: 0; position: relative;">
+                <label style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 0.82rem; width: 100%;">
                   <span>🤖 Yapay Zeka & URL Selector Analiz Aracı</span>
+                  <span style="font-size: 0.7rem; background: rgba(244, 63, 94, 0.2); color: #f43f5e; padding: 2px 8px; border-radius: 999px; font-weight: 700;">YAKINDA</span>
                 </label>
-                <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0 0 10px;">Ürün detay sayfa URL'sini girerek CSS selectorlerini otomatik tespit edin.</p>
-                <div style="display: flex; gap: 8px;">
-                  <input type="text" id="opt-url-detector" class="form-control" placeholder="https://magaza.com/urun-detay" style="flex: 1;" />
-                  <button type="button" class="btn-apply" style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap; box-shadow: none;" onclick="detectSelectorsFromUrl()">
-                    Selectorleri Bul
-                  </button>
+                
+                <div style="filter: blur(4px); opacity: 0.5; pointer-events: none; user-select: none;">
+                  <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0 0 10px;">Ürün detay sayfa URL'sini girerek CSS selectorlerini otomatik tespit edin.</p>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="opt-url-detector" class="form-control" placeholder="https://magaza.com/urun-detay" style="flex: 1;" disabled />
+                    <button type="button" class="btn-apply" style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap; box-shadow: none;" disabled>
+                      Selectorleri Bul
+                    </button>
+                  </div>
                 </div>
-                <div id="detector-status" style="font-size: 0.78rem; color: #10b981; margin-top: 8px; display: none;"></div>
+                
+                <!-- Center overlay text -->
+                <div style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e1; font-weight: 700; font-size: 0.82rem; text-shadow: 0 2px 8px rgba(0,0,0,0.8); pointer-events: none;">
+                  Henüz Hazır Değil
+                </div>
               </div>
             </div>
 
@@ -813,6 +837,14 @@
               <div class="code-snippet-box">
                 <button class="copy-btn" onclick="copyEmbedCode()">Kopyala</button>
                 <code id="embed-code-html"></code>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+              <label>Tarayıcı Konsol Kodu (Canlı Mağazada Test Etmek İçin)</label>
+              <div class="code-snippet-box">
+                <button class="copy-btn" onclick="copyConsoleCode()">Kopyala</button>
+                <code id="embed-code-console"></code>
               </div>
             </div>
           </div>
@@ -1081,6 +1113,29 @@
         document.getElementById('radius-val').textContent = val + 'px';
       }
 
+      function validateAndUpdate() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const errSpan = document.getElementById('target-selector-error');
+        const copyBtns = document.querySelectorAll('.copy-btn');
+        const codeHtml = document.getElementById('embed-code-html');
+        const codeConsole = document.getElementById('embed-code-console');
+
+        if (!targetSel) {
+          errSpan.style.display = 'block';
+          copyBtns.forEach(btn => btn.style.display = 'none');
+          const errMsg = 'Lütfen zorunlu olan "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun...';
+          codeHtml.innerText = errMsg;
+          if (codeConsole) codeConsole.innerText = errMsg;
+          return false;
+        } else {
+          errSpan.style.display = 'none';
+          copyBtns.forEach(btn => btn.style.display = 'block');
+          updateEmbedCode();
+          applySettings();
+          return true;
+        }
+      }
+
       function updateEmbedCode() {
         const color = document.getElementById('opt-btn-color').value;
         const textColor = document.getElementById('opt-btn-text').value;
@@ -1089,18 +1144,30 @@
         const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
         const showSelectSize = document.getElementById('opt-show-select-size').value;
         const preset = document.getElementById('opt-preset').value;
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const insertPos = document.getElementById('opt-insert-position').value;
+
+        if (!targetSel) {
+          const errMsg = 'Lütfen zorunlu olan "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun...';
+          document.getElementById('embed-code-html').innerText = errMsg;
+          const consoleCodeBox = document.getElementById('embed-code-console');
+          if (consoleCodeBox) consoleCodeBox.innerText = errMsg;
+          return;
+        }
 
         const sel = document.getElementById('opt-product');
         const opt = sel.options[sel.selectedIndex];
         const brand = opt.dataset.brand;
 
-        const code = `<!-- ShoeFit Widget Container -->
-<div 
-  id="shoefit-widget"
+        const code = `<!-- Embed Script -->
+<script 
+  src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js" 
   data-store-id="STORE_DEMO"
   data-product-id="prod-samba-12"
   data-brand="${brand}"
   data-size-system="EU"
+  data-target-selector="${targetSel}"
+  data-insert-position="${insertPos}"
   data-button-color="${color}"
   data-button-text-color="${textColor}"
   data-border-radius="${radius}px"
@@ -1109,13 +1176,32 @@
   data-show-select-size="${showSelectSize}"
   data-style-preset="${preset}"
   data-size-selector="${document.getElementById('opt-size-selector').value}"
-  data-cart-selector="${document.getElementById('opt-cart-selector').value}">
-</div>
-
-<!-- Embed Script -->
-<script src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js" async><\/script>`;
+  data-cart-selector="${document.getElementById('opt-cart-selector').value}"
+  async>
+<\/script>`;
 
         document.getElementById('embed-code-html').innerText = code;
+
+        const consoleCode = `const script = document.createElement('script');
+script.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
+script.dataset.storeId = 'STORE_DEMO';
+script.dataset.productId = 'prod-samba-12';
+script.dataset.brand = '${brand}';
+script.dataset.targetSelector = '${targetSel}';
+script.dataset.insertPosition = '${insertPos}';
+script.dataset.buttonColor = '${color}';
+script.dataset.buttonTextColor = '${textColor}';
+script.dataset.borderRadius = '${radius}px';
+script.dataset.language = '${lang}';
+script.dataset.showAddToCart = '${showAddToCart}';
+script.dataset.showSelectSize = '${showSelectSize}';
+script.dataset.stylePreset = '${preset}';
+script.dataset.sizeSelector = '${document.getElementById('opt-size-selector').value}';
+script.dataset.cartSelector = '${document.getElementById('opt-cart-selector').value}';
+document.body.appendChild(script);`;
+
+        const consoleCodeBox = document.getElementById('embed-code-console');
+        if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;
       }
 
       function applySettings(onlyStyle = false) {
@@ -1126,6 +1212,8 @@
         const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
         const showSelectSize = document.getElementById('opt-show-select-size').value;
         const preset = document.getElementById('opt-preset').value;
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const insertPos = document.getElementById('opt-insert-position').value;
 
         const sel = document.getElementById('opt-product');
         const opt = sel.options[sel.selectedIndex];
@@ -1141,6 +1229,8 @@
           widgetDiv.setAttribute('data-show-add-to-cart', showAddToCart);
           widgetDiv.setAttribute('data-show-select-size', showSelectSize);
           widgetDiv.setAttribute('data-style-preset', preset);
+          widgetDiv.setAttribute('data-target-selector', targetSel);
+          widgetDiv.setAttribute('data-insert-position', insertPos);
           widgetDiv.setAttribute('data-size-selector', document.getElementById('opt-size-selector').value);
           widgetDiv.setAttribute('data-cart-selector', document.getElementById('opt-cart-selector').value);
 
@@ -1160,7 +1250,7 @@
 
         if (window.reInitShoeSizeWidget) {
           window.reInitShoeSizeWidget();
-          logEvent('Settings Applied', { color, radius: radius + 'px', lang, brand, preset });
+          logEvent('Settings Applied', { color, radius: radius + 'px', lang, brand, preset, targetSel, insertPos });
         }
       }
 
@@ -1361,9 +1451,26 @@
       }
 
       function copyEmbedCode() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        if (!targetSel) {
+          alert('Lütfen önce "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun.');
+          return;
+        }
         const codeText = document.getElementById('embed-code-html').innerText;
         navigator.clipboard.writeText(codeText).then(() => {
           alert('Kod panoya kopyalandı!');
+        });
+      }
+
+      function copyConsoleCode() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        if (!targetSel) {
+          alert('Lütfen önce "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun.');
+          return;
+        }
+        const codeText = document.getElementById('embed-code-console').innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          alert('Konsol kodu panoya kopyalandı!');
         });
       }
 
@@ -1380,7 +1487,7 @@
       }
 
       updateRadiusLabel('16');
-      updateEmbedCode();
+      validateAndUpdate();
     </script>
   </body>
 </html>

@@ -165,9 +165,20 @@ export default function ShoeSizeWidget({
   showSelectSize = 'true',
   initialStep = 1
 }: ShoeSizeWidgetProps) {
-  const open = true
-  const setOpen = (val: boolean) => {}
+  const isDemo = storeId === 'STORE_DEMO'
+  const [open, setOpen] = useState(isDemo)
   const [currentStep, setCurrentStep] = useState(initialStep)
+
+  useEffect(() => {
+    const handleOpen = () => setOpen(true)
+    const handleClose = () => setOpen(false)
+    window.addEventListener('shoefit_open_widget', handleOpen)
+    window.addEventListener('shoefit_close_widget', handleClose)
+    return () => {
+      window.removeEventListener('shoefit_open_widget', handleOpen)
+      window.removeEventListener('shoefit_close_widget', handleClose)
+    }
+  }, [])
 
   // Language setup
   const lang = useMemo(() => {
@@ -460,11 +471,38 @@ export default function ShoeSizeWidget({
 
   return (
     <div className="ssw-widget">
+      {!isDemo && (
+        <div className="ssw-trigger-container">
+          <button
+            type="button"
+            className="ssw-trigger"
+            onClick={() => {
+              setOpen(true)
+              dispatchEvent('widget_opened')
+            }}
+          >
+            👟 {t.start}
+          </button>
+        </div>
+      )}
+
+      {!isDemo && open && (
+        <div
+          className="ssw-overlay"
+          onClick={() => {
+            setOpen(false)
+            dispatchEvent('widget_closed')
+          }}
+        />
+      )}
 
       {/* Slide-out Drawer */}
       <Drawer
         open={open}
-        onClose={handleCloseDrawer}
+        onClose={() => {
+          setOpen(false)
+          dispatchEvent('widget_closed')
+        }}
         title={t.title}
         subtitle={t.subtitle}
         stylePreset={stylePreset}

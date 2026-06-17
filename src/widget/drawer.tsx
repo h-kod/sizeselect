@@ -39,6 +39,9 @@ export default function Drawer({ open, onClose, title, subtitle, stylePreset = '
               <p className="ssw-title">{title}</p>
               <p className="ssw-subtitle">{subtitle}</p>
             </div>
+            <button type="button" className="ssw-close-btn" onClick={onClose} aria-label="Close">
+              &times;
+            </button>
           </div>
         </header>
         <div className="ssw-body">{children}</div>

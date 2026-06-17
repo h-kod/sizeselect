@@ -1018,7 +1018,13 @@
     </main>
 
     <!-- LOAD THE WIDGET BUNDLE AS A MODULE -->
-    <script type="module" src="/src/widget/embed.ts"></script>
+    <script type="module">
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = isLocal ? '/src/widget/embed.ts' : '/shoe-size-widget.js';
+      document.body.appendChild(script);
+    </script>
 
     <!-- CONTROL PANEL LOGIC -->
     <script>
@@ -1107,7 +1113,7 @@
 </div>
 
 <!-- Embed Script -->
-<script src="https://cdn.jsdelivr.net/gh/h-kod/sizeselect/dist/shoe-size-widget.js" async><\/script>`;
+<script src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js" async><\/script>`;
 
         document.getElementById('embed-code-html').innerText = code;
       }

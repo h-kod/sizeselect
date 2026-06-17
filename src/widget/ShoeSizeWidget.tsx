@@ -188,6 +188,17 @@ export default function ShoeSizeWidget({
     }
   }, [])
 
+  // Drawer açıkken body scroll'u kilitle (mobil için kritik)
+  useEffect(() => {
+    if (isDemo) return
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open, isDemo])
+
   // Language setup
   const lang = useMemo(() => {
     if (languageMode === 'tr') return 'tr'

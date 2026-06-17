@@ -511,7 +511,9 @@ export default function ShoeSizeWidget({
         <div className="ssw-stepper">
           <span className={`ssw-step ${currentStep === 1 ? 'active' : ''}`}>{t.stepBrand}</span>
           <span className={`ssw-step ${currentStep === 2 ? 'active' : ''}`}>{t.stepSize}</span>
-          <span className={`ssw-step ${currentStep === 3 ? 'active' : ''}`}>{t.stepFit}</span>
+          {!isMeasuring && (
+            <span className={`ssw-step ${currentStep === 3 ? 'active' : ''}`}>{t.stepFit}</span>
+          )}
           <span className={`ssw-step ${currentStep === 4 ? 'active' : ''}`}>{t.stepResult}</span>
         </div>
 
@@ -713,7 +715,15 @@ export default function ShoeSizeWidget({
                 type="button"
                 className="ssw-button"
                 disabled={isMeasuring && (!measuredCm || measuredCm <= 0)}
-                onClick={() => setCurrentStep(3)}
+                onClick={() => {
+                  // cm ölçüm modunda kalıp sorusu anlamsız — direkt sonuca git
+                  if (isMeasuring) {
+                    setCurrentStep(4)
+                    dispatchEvent('recommendation_completed')
+                  } else {
+                    setCurrentStep(3)
+                  }
+                }}
               >
                 {t.next}
               </button>
@@ -721,8 +731,8 @@ export default function ShoeSizeWidget({
           </div>
         )}
 
-        {/* STEP 3: Fit & Width Preference */}
-        {currentStep === 3 && (
+        {/* STEP 3: Fit & Width Preference (sadece referans numara modunda gösterilir) */}
+        {currentStep === 3 && !isMeasuring && (
           <div className="ssw-fade-in">
             <div className="ssw-card">
               <label className="ssw-label">{t.howItFits}</label>

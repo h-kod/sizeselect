@@ -169,6 +169,14 @@ export default function ShoeSizeWidget({
   const [open, setOpen] = useState(isDemo)
   const [currentStep, setCurrentStep] = useState(initialStep)
 
+  // Sayfa başlığından ürün adını öğren: - veya | öncesi, ilk 4 kelime
+  const pageTitle = useMemo(() => {
+    const raw = document.title || ''
+    const trimmed = raw.split(/[-|]/)[0].trim()
+    const words = trimmed.split(/\s+/).slice(0, 4).join(' ')
+    return words || targetBrand
+  }, [])
+
   useEffect(() => {
     const handleOpen = () => setOpen(true)
     const handleClose = () => setOpen(false)
@@ -559,9 +567,7 @@ export default function ShoeSizeWidget({
             {/* Target Model Notice */}
             <div className="ssw-target-notice" style={{ marginTop: '8px' }}>
               <span className="ssw-target-badge">{t.targetProduct}</span>
-              <strong>
-                {targetBrand} {targetModel}
-              </strong>
+              <strong>{pageTitle}</strong>
             </div>
 
             {/* Vertical Brand list selection */}

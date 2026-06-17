@@ -150,39 +150,41 @@ function reInit(openOnMount = false) {
   init(wasOpen, lastStep)
 }
 
-function init(openOnMount = false, initialStep = 1) {
-  // Avoid double mounting
-  if (mounted && document.querySelector('[data-ssw-host]')) return
+function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<WidgetConfig>) {
+  // Avoid double mounting (unless force config provided)
+  if (!forceConfig && mounted && document.querySelector('[data-ssw-host]')) return
 
   // Gather config parameters from script and div container
+  // NOTE: document.currentScript is null in ES modules - use querySelector fallback
   const script = (document.currentScript as HTMLScriptElement | null) ||
+                 (document.querySelector('script[data-store-id]') as HTMLScriptElement | null) ||
                  (document.querySelector('script[src*="shoe-size-widget"]') as HTMLScriptElement | null)
   const scriptDataset = script?.dataset || {}
 
   // Check target-selector
   const divContainer = document.getElementById('shoefit-widget')
-  const targetSelector = divContainer?.getAttribute('data-target-selector') || scriptDataset.targetSelector || ''
-  const insertPosition = divContainer?.getAttribute('data-insert-position') || scriptDataset.insertPosition || 'after'
+  const targetSelector = forceConfig?.targetSelector || divContainer?.getAttribute('data-target-selector') || scriptDataset.targetSelector || ''
+  const insertPosition = forceConfig?.insertPosition || divContainer?.getAttribute('data-insert-position') || scriptDataset.insertPosition || 'after'
 
   const target = findInsertTarget(targetSelector)
   if (!target) return
   currentTarget = target
 
-  // Preference order: 1. Div container attributes, 2. Script attributes, 3. Defaults
-  const storeId = divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
-  const productId = divContainer?.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
-  const brand = divContainer?.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
-  const model = divContainer?.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
-  const sizeSystem = divContainer?.getAttribute('data-size-system') || scriptDataset.sizeSystem || 'EU'
-  const buttonColor = divContainer?.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
-  const buttonTextColor = divContainer?.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
-  const borderRadius = divContainer?.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
-  const language = divContainer?.getAttribute('data-language') || scriptDataset.language || 'auto'
-  const stylePreset = divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
-  const sizeSelector = divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
-  const cartSelector = divContainer?.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
-  const showAddToCart = divContainer?.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
-  const showSelectSize = divContainer?.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
+  // Preference order: 1. forceConfig, 2. Div container attributes, 3. Script attributes, 4. Defaults
+  const storeId = forceConfig?.storeId || divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
+  const productId = forceConfig?.productId || divContainer?.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
+  const brand = forceConfig?.brand || divContainer?.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
+  const model = forceConfig?.model || divContainer?.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
+  const sizeSystem = forceConfig?.sizeSystem || divContainer?.getAttribute('data-size-system') || scriptDataset.sizeSystem || 'EU'
+  const buttonColor = forceConfig?.buttonColor || divContainer?.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
+  const buttonTextColor = forceConfig?.buttonTextColor || divContainer?.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
+  const borderRadius = forceConfig?.borderRadius || divContainer?.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
+  const language = forceConfig?.language || divContainer?.getAttribute('data-language') || scriptDataset.language || 'auto'
+  const stylePreset = forceConfig?.stylePreset || divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
+  const sizeSelector = forceConfig?.sizeSelector || divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
+  const cartSelector = forceConfig?.cartSelector || divContainer?.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
+  const showAddToCart = forceConfig?.showAddToCart || divContainer?.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
+  const showSelectSize = forceConfig?.showSelectSize || divContainer?.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
 
   const config: Partial<WidgetConfig> = {
     storeId,
@@ -212,6 +214,19 @@ function init(openOnMount = false, initialStep = 1) {
   // Bind trigger actions to window scope
   ;(window as any).openShoeSizeWidget = openWidget
   ;(window as any).reInitShoeSizeWidget = reInit
+}
+
+// Allow direct initialization via window.ShoeFitWidget.init(config)
+;(window as any).ShoeFitWidget = {
+  init: (config: Partial<WidgetConfig>) => {
+    // Remove existing widget if present
+    const existing = document.querySelector('[data-ssw-host]')
+    if (existing) existing.remove()
+    mounted = false
+    init(false, 1, config)
+  },
+  open: openWidget,
+  reInit
 }
 
 // Initialize on page load

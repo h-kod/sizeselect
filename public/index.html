@@ -1182,23 +1182,31 @@
 
         document.getElementById('embed-code-html').innerText = code;
 
-        const consoleCode = `const script = document.createElement('script');
-script.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
-script.dataset.storeId = 'STORE_DEMO';
-script.dataset.productId = 'prod-samba-12';
-script.dataset.brand = '${brand}';
-script.dataset.targetSelector = '${targetSel}';
-script.dataset.insertPosition = '${insertPos}';
-script.dataset.buttonColor = '${color}';
-script.dataset.buttonTextColor = '${textColor}';
-script.dataset.borderRadius = '${radius}px';
-script.dataset.language = '${lang}';
-script.dataset.showAddToCart = '${showAddToCart}';
-script.dataset.showSelectSize = '${showSelectSize}';
-script.dataset.stylePreset = '${preset}';
-script.dataset.sizeSelector = '${document.getElementById('opt-size-selector').value}';
-script.dataset.cartSelector = '${document.getElementById('opt-cart-selector').value}';
-document.body.appendChild(script);`;
+        const sizeSelVal = document.getElementById('opt-size-selector').value;
+        const cartSelVal = document.getElementById('opt-cart-selector').value;
+
+        const consoleCode = `// ADIM 1: Widget script'i yükle
+const s = document.createElement('script');
+s.type = 'module';
+s.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
+document.head.appendChild(s);
+
+// ADIM 2: Script yüklendikten sonra yapılandır ve başlat
+s.onload = () => window.ShoeFitWidget.init({
+  storeId: 'STORE_1',
+  brand: '${brand}',
+  targetSelector: '${targetSel}',
+  insertPosition: '${insertPos}',
+  buttonColor: '${color}',
+  buttonTextColor: '${textColor}',
+  borderRadius: '${radius}px',
+  language: '${lang}',
+  showAddToCart: '${showAddToCart}',
+  showSelectSize: '${showSelectSize}',
+  stylePreset: '${preset}',
+  sizeSelector: '${sizeSelVal}',
+  cartSelector: '${cartSelVal}'
+});`;
 
         const consoleCodeBox = document.getElementById('embed-code-console');
         if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;

@@ -15,6 +15,7 @@ interface WidgetConfig {
   buttonColor: string
   buttonTextColor: string
   borderRadius: string
+  buttonFontSize: string
   language: string
   stylePreset: string
   sizeSelector: string
@@ -39,10 +40,12 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
   const primaryColor = config.buttonColor || '#2563eb'
   const textColor = config.buttonTextColor || '#ffffff'
   const radius = config.borderRadius || '16px'
+  const fontSize = config.buttonFontSize || '14px'
 
   host.style.setProperty('--ssw-primary', primaryColor)
   host.style.setProperty('--ssw-text-on-primary', textColor)
   host.style.setProperty('--ssw-radius', radius)
+  host.style.setProperty('--ssw-font-size', fontSize)
 
   // Attach Shadow DOM for CSS isolation
   const shadow = host.attachShadow({ mode: 'open' })
@@ -179,6 +182,7 @@ function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<Widget
   const buttonColor = forceConfig?.buttonColor || divContainer?.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
   const buttonTextColor = forceConfig?.buttonTextColor || divContainer?.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
   const borderRadius = forceConfig?.borderRadius || divContainer?.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
+  const buttonFontSize = forceConfig?.buttonFontSize || divContainer?.getAttribute('data-button-font-size') || scriptDataset.buttonFontSize || '14px'
   const language = forceConfig?.language || divContainer?.getAttribute('data-language') || scriptDataset.language || 'auto'
   const stylePreset = forceConfig?.stylePreset || divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
   const sizeSelector = forceConfig?.sizeSelector || divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
@@ -195,6 +199,7 @@ function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<Widget
     buttonColor,
     buttonTextColor,
     borderRadius,
+    buttonFontSize,
     language,
     stylePreset,
     sizeSelector,

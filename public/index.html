@@ -598,6 +598,17 @@
           width: 100% !important;
         }
       }
+      .trigger-preset-btn {
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      }
+      .trigger-preset-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .trigger-preset-btn:active {
+        transform: translateY(0);
+      }
       @media (max-width: 768px) {
         main {
           grid-template-columns: 1fr;
@@ -645,7 +656,11 @@
                 <span style="font-size: 0.7rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Butonu Etkiler</span>
               </h4>
 
-              <div class="form-row">
+              <!-- Hidden inputs to preserve existing functionality -->
+              <input type="hidden" id="opt-show-add-to-cart" value="true" />
+              <input type="hidden" id="opt-show-select-size" value="true" />
+
+              <div class="form-row" style="margin-bottom: 12px;">
                 <div class="form-group">
                   <label for="opt-btn-color">Buton Teması (Birincil Renk)</label>
                   <input type="color" id="opt-btn-color" class="form-control" value="#2563eb" oninput="updateEmbedCode(); applySettings(true);" />
@@ -656,7 +671,7 @@
                 </div>
               </div>
 
-              <div class="form-row">
+              <div class="form-row" style="margin-bottom: 16px;">
                 <div class="form-group">
                   <label for="opt-radius">Border Radius (Köşe Yuvarlama)</label>
                   <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
@@ -665,26 +680,27 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>Sepete Ekle Butonu</label>
-                  <div class="btn-group-toggle" id="group-show-add-to-cart">
-                    <button type="button" class="btn-toggle active" data-value="true" onclick="setToggleOption('show-add-to-cart', 'true')">Açık</button>
-                    <button type="button" class="btn-toggle" data-value="false" onclick="setToggleOption('show-add-to-cart', 'false')">Kapalı</button>
+                  <label for="opt-btn-font-size">Yazı Boyutu (Font Size)</label>
+                  <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
+                    <input type="range" id="opt-btn-font-size" min="10" max="24" value="14" class="form-control" style="padding: 0;" oninput="updateFontSizeLabel(this.value); updateEmbedCode(); applySettings(true);" />
+                    <span id="font-size-val" style="font-size: 0.88rem; font-weight: 700; width: 40px; color: #94a3b8;">14px</span>
                   </div>
-                  <input type="hidden" id="opt-show-add-to-cart" value="true" />
                 </div>
               </div>
 
-              <div class="form-row" style="margin-top: 12px;">
-                <div class="form-group">
-                  <label>Numarayı Seç Butonu</label>
-                  <div class="btn-group-toggle" id="group-show-select-size">
-                    <button type="button" class="btn-toggle active" data-value="true" onclick="setToggleOption('show-select-size', 'true')">Açık</button>
-                    <button type="button" class="btn-toggle" data-value="false" onclick="setToggleOption('show-select-size', 'false')">Kapalı</button>
-                  </div>
-                  <input type="hidden" id="opt-show-select-size" value="true" />
-                </div>
-                <div class="form-group">
-                  <!-- Spacer -->
+              <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px;">Hazır Buton Tasarım Örnekleri (Tıkla ve Uygula)</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <button type="button" class="trigger-preset-btn" style="background: #2563eb; color: #ffffff; border-radius: 8px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#2563eb', '#ffffff', 8, 14)">Modern Blue</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #1f2937; color: #ffffff; border-radius: 12px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#1f2937', '#ffffff', 12, 14)">Dark Charcoal</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #10b981; color: #ffffff; border-radius: 30px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#10b981', '#ffffff', 30, 13)">Eco Green</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #ef4444; color: #ffffff; border-radius: 10px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ef4444', '#ffffff', 10, 14)">Bright Crimson</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #8b5cf6; color: #ffffff; border-radius: 16px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#8b5cf6', '#ffffff', 16, 14)">Soft Purple</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #f97316; color: #ffffff; border-radius: 30px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#f97316', '#ffffff', 30, 14)">Nike Orange</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #e2e8f0; color: #0f172a; border-radius: 6px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#e2e8f0', '#0f172a', 6, 13)">Clean Light</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #d97706; color: #ffffff; border-radius: 4px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#d97706', '#ffffff', 4, 14)">Luxury Gold</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #ec4899; color: #ffffff; border-radius: 20px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ec4899', '#ffffff', 20, 14)">Rose Velvet</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #09090b; color: #ffffff; border-radius: 6px; font-size: 15px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#09090b', '#ffffff', 6, 15)">Monochrome Dark</button>
                 </div>
               </div>
             </div>
@@ -1113,6 +1129,107 @@
         document.getElementById('radius-val').textContent = val + 'px';
       }
 
+      function updateFontSizeLabel(val) {
+        document.getElementById('font-size-val').textContent = val + 'px';
+      }
+
+      function applyTriggerPreset(color, textColor, radius, fontSize) {
+        document.getElementById('opt-btn-color').value = color;
+        document.getElementById('opt-btn-text').value = textColor;
+        document.getElementById('opt-radius').value = radius;
+        updateRadiusLabel(radius);
+        
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        if (fontSizeEl) {
+          fontSizeEl.value = fontSize;
+          updateFontSizeLabel(fontSize);
+        }
+        
+        updateEmbedCode();
+        applySettings(true);
+      }
+
+      function saveAllSettings() {
+        const settings = {
+          color: document.getElementById('opt-btn-color').value,
+          textColor: document.getElementById('opt-btn-text').value,
+          radius: document.getElementById('opt-radius').value,
+          fontSize: document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14',
+          lang: document.getElementById('opt-lang').value,
+          preset: document.getElementById('opt-preset').value,
+          targetSel: document.getElementById('opt-target-selector').value,
+          insertPos: document.getElementById('opt-insert-position').value,
+          sizeSel: document.getElementById('opt-size-selector').value,
+          cartSel: document.getElementById('opt-cart-selector').value
+        };
+        localStorage.setItem('shoefit_merchant_settings', JSON.stringify(settings));
+      }
+
+      function setToggleOptionWithoutApply(optionName, val) {
+        const group = document.getElementById(`group-${optionName}`);
+        if (group) {
+          group.querySelectorAll('.btn-toggle').forEach(btn => {
+            if (btn.dataset.value === val) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        }
+        document.getElementById(`opt-${optionName}`).value = val;
+      }
+
+      function selectPresetWithoutApply(presetVal) {
+        document.querySelectorAll('.preset-card').forEach(card => {
+          card.classList.remove('active');
+        });
+        const activeCard = document.querySelector(`.preset-card[data-preset="${presetVal}"]`);
+        if (activeCard) {
+          activeCard.classList.add('active');
+        }
+        document.getElementById('opt-preset').value = presetVal;
+      }
+
+      function loadAllSettings() {
+        try {
+          const data = localStorage.getItem('shoefit_merchant_settings');
+          if (!data) return;
+          const settings = JSON.parse(data);
+          if (settings.color) {
+            document.getElementById('opt-btn-color').value = settings.color;
+          }
+          if (settings.textColor) {
+            document.getElementById('opt-btn-text').value = settings.textColor;
+          }
+          if (settings.radius) {
+            document.getElementById('opt-radius').value = settings.radius;
+          }
+          if (settings.fontSize && document.getElementById('opt-btn-font-size')) {
+            document.getElementById('opt-btn-font-size').value = settings.fontSize;
+          }
+          if (settings.lang) {
+            setToggleOptionWithoutApply('lang', settings.lang);
+          }
+          if (settings.preset) {
+            selectPresetWithoutApply(settings.preset);
+          }
+          if (settings.targetSel !== undefined) {
+            document.getElementById('opt-target-selector').value = settings.targetSel;
+          }
+          if (settings.insertPos) {
+            setToggleOptionWithoutApply('insert-position', settings.insertPos);
+          }
+          if (settings.sizeSel !== undefined) {
+            document.getElementById('opt-size-selector').value = settings.sizeSel;
+          }
+          if (settings.cartSel !== undefined) {
+            document.getElementById('opt-cart-selector').value = settings.cartSel;
+          }
+        } catch (e) {
+          console.error('Error loading settings:', e);
+        }
+      }
+
       function validateAndUpdate() {
         const targetSel = document.getElementById('opt-target-selector').value.trim();
         const errSpan = document.getElementById('target-selector-error');
@@ -1140,6 +1257,8 @@
         const color = document.getElementById('opt-btn-color').value;
         const textColor = document.getElementById('opt-btn-text').value;
         const radius = document.getElementById('opt-radius').value;
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
         const lang = document.getElementById('opt-lang').value;
         const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
         const showSelectSize = document.getElementById('opt-show-select-size').value;
@@ -1171,6 +1290,7 @@
   data-button-color="${color}"
   data-button-text-color="${textColor}"
   data-border-radius="${radius}px"
+  data-button-font-size="${fontSize}px"
   data-language="${lang}"
   data-show-add-to-cart="${showAddToCart}"
   data-show-select-size="${showSelectSize}"
@@ -1200,6 +1320,7 @@ s.onload = () => window.ShoeFitWidget.init({
   buttonColor: '${color}',
   buttonTextColor: '${textColor}',
   borderRadius: '${radius}px',
+  buttonFontSize: '${fontSize}px',
   language: '${lang}',
   showAddToCart: '${showAddToCart}',
   showSelectSize: '${showSelectSize}',
@@ -1216,6 +1337,8 @@ s.onload = () => window.ShoeFitWidget.init({
         const color = document.getElementById('opt-btn-color').value;
         const textColor = document.getElementById('opt-btn-text').value;
         const radius = document.getElementById('opt-radius').value;
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
         const lang = document.getElementById('opt-lang').value;
         const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
         const showSelectSize = document.getElementById('opt-show-select-size').value;
@@ -1233,6 +1356,7 @@ s.onload = () => window.ShoeFitWidget.init({
           widgetDiv.setAttribute('data-button-color', color);
           widgetDiv.setAttribute('data-button-text-color', textColor);
           widgetDiv.setAttribute('data-border-radius', radius + 'px');
+          widgetDiv.setAttribute('data-button-font-size', fontSize + 'px');
           widgetDiv.setAttribute('data-language', lang);
           widgetDiv.setAttribute('data-show-add-to-cart', showAddToCart);
           widgetDiv.setAttribute('data-show-select-size', showSelectSize);
@@ -1248,6 +1372,7 @@ s.onload = () => window.ShoeFitWidget.init({
             host.style.setProperty('--ssw-primary', color);
             host.style.setProperty('--ssw-text-on-primary', textColor);
             host.style.setProperty('--ssw-radius', radius + 'px');
+            host.style.setProperty('--ssw-font-size', fontSize + 'px');
           }
         }
 
@@ -1257,17 +1382,20 @@ s.onload = () => window.ShoeFitWidget.init({
           previewBtn.style.background = color;
           previewBtn.style.color = textColor;
           previewBtn.style.borderRadius = radius + 'px';
+          previewBtn.style.fontSize = fontSize + 'px';
           previewBtn.style.boxShadow = `0 4px 10px ${color}40`;
         }
 
+        saveAllSettings();
+
         if (onlyStyle) {
-          logEvent('Styles Applied', { color, radius: radius + 'px' });
+          logEvent('Styles Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px' });
           return;
         }
 
         if (window.reInitShoeSizeWidget) {
           window.reInitShoeSizeWidget();
-          logEvent('Settings Applied', { color, radius: radius + 'px', lang, brand, preset, targetSel, insertPos });
+          logEvent('Settings Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px', lang, brand, preset, targetSel, insertPos });
         }
       }
 
@@ -1503,7 +1631,9 @@ s.onload = () => window.ShoeFitWidget.init({
         }
       }
 
-      updateRadiusLabel('16');
+      loadAllSettings();
+      updateRadiusLabel(document.getElementById('opt-radius').value);
+      updateFontSizeLabel(document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14');
       validateAndUpdate();
     </script>
   </body>

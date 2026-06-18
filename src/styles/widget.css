@@ -8,6 +8,7 @@
   --ssw-primary: #2563eb;
   --ssw-text-on-primary: #ffffff;
   --ssw-radius: 16px;
+  --ssw-font-size: 14px;
 }
 
 *, *:before, *:after {
@@ -29,7 +30,7 @@
   border: none;
   border-radius: var(--ssw-radius);
   padding: 0.85rem 1.3rem;
-  font-size: 0.92rem;
+  font-size: var(--ssw-font-size);
   font-weight: 700;
   background: linear-gradient(135deg, var(--ssw-primary), color-mix(in srgb, var(--ssw-primary) 85%, #000));
   color: var(--ssw-text-on-primary);

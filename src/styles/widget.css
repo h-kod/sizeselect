@@ -729,6 +729,13 @@
   animation: ssw-fade-in-anim 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.ssw-body > .ssw-fade-in {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 @keyframes ssw-fade-in-anim {
   from {
     opacity: 0;

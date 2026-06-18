@@ -1013,7 +1013,15 @@
           </div>
 
           <div id="iframe-error-warning" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #f87171;">
-            ⚠️ <strong>Güvenlik Sınırı Uyarısı:</strong> Tarayıcı güvenlik politikası (Same-Origin Policy) nedeniyle bu sitenin DOM yapısına doğrudan erişilemiyor olabilir. Entegrasyon gerçekleşmezse sağdaki <strong>Konsol Kodunu</strong> kopyalayıp sitenin geliştirici konsolunda çalıştırarak asistanı anında görebilirsiniz.
+            ⚠️ <strong>Güvenlik Sınırı Uyarısı:</strong> Tarayıcı güvenlik politikası (Same-Origin Policy) nedeniyle bu sitenin DOM yapısına doğrudan erişilemiyor. Entegrasyonu simüle etmek için aşağıdaki <strong>Konsol Kodunu</strong> kopyalayıp web sitenizin sekmesinde F12/Geliştirici Konsolunda çalıştırarak asistanı anında görebilirsiniz.
+          </div>
+
+          <div id="preview-console-code-wrapper" style="margin-bottom: 16px; display: none;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;">💻 Manuel Tarayıcı Konsolu Kodu (Kopyalayıp Sitenizin Konsoluna Yapıştırın)</label>
+            <div class="code-snippet-box" style="margin-top: 0; padding: 12px; font-size: 0.8rem; height: 120px; overflow-y: auto; background: #06070d; border: 1px solid var(--border-color); border-radius: 12px; position: relative;">
+              <button class="copy-btn" onclick="copyConsoleCode()" style="position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500;">Kopyala</button>
+              <pre id="preview-code-console" style="margin: 0; white-space: pre-wrap; font-family: monospace; color: #f8fafc; text-align: left;"></pre>
+            </div>
           </div>
 
           <div style="border: 2px dashed var(--border-color); border-radius: 14px; overflow: hidden; background: #000; height: 500px; position: relative;">
@@ -1366,6 +1374,9 @@ s.onload = () => window.ShoeFitWidget.init({
 
         const consoleCodeBox = document.getElementById('embed-code-console');
         if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;
+
+        const previewConsoleCodeBox = document.getElementById('preview-code-console');
+        if (previewConsoleCodeBox) previewConsoleCodeBox.innerText = consoleCode;
       }
 
       function applySettings(onlyStyle = false) {
@@ -1460,19 +1471,23 @@ s.onload = () => window.ShoeFitWidget.init({
         const iframe = document.getElementById('preview-website-iframe');
         const placeholder = document.getElementById('iframe-placeholder');
         const errorWarning = document.getElementById('iframe-error-warning');
+        const consoleWrapper = document.getElementById('preview-console-code-wrapper');
 
         placeholder.style.display = 'none';
         iframe.src = formattedUrl;
         errorWarning.style.display = 'none';
+        if (consoleWrapper) consoleWrapper.style.display = 'none';
 
         iframe.onload = function() {
           try {
             const doc = iframe.contentDocument || iframe.contentWindow.document;
             console.log('Same-origin site loaded successfully.');
             errorWarning.style.display = 'none';
+            if (consoleWrapper) consoleWrapper.style.display = 'none';
           } catch (e) {
             console.warn('Cross-origin restriction detected.', e);
             errorWarning.style.display = 'block';
+            if (consoleWrapper) consoleWrapper.style.display = 'block';
           }
         };
       }

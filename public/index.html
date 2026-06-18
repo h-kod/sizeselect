@@ -637,7 +637,6 @@
           <button class="panel-tab" onclick="switchTab('tab-analytics', this)">📊 Canlı Analitikler</button>
           <button class="panel-tab" onclick="switchTab('tab-mappings', this)">👟 Ürün Eşleştirme</button>
           <button class="panel-tab" onclick="switchTab('tab-db', this)">📦 Marka Kalıp Verileri</button>
-          <button class="panel-tab" onclick="switchTab('tab-site-preview', this)">🌐 Sitemde Önizle</button>
         </div>
 
         <!-- TAB 1: Widget Customizer -->
@@ -994,48 +993,7 @@
           </table>
         </div>
 
-        <!-- TAB 5: Website Live Preview & Injection -->
-        <div id="tab-site-preview" class="tab-content">
-          <p class="db-description" style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 16px;">
-            Kendi e-ticaret web sitenizi buraya yükleyip, oluşturduğunuz ShoeFit asistanını doğrudan web siteniz üzerinde test edebilirsiniz.
-          </p>
-          
-          <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center;">
-            <input type="text" id="preview-site-url" class="form-control" placeholder="https://sitenizinadi.com" value="https://sizeselect-ecommerce.netlify.app" style="flex: 1;" />
-            <button class="btn-apply" onclick="loadPreviewSite()" style="padding: 11px 20px; white-space: nowrap; font-size: 0.88rem; margin: 0; background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);">Sitede Test Et / Yükle</button>
-          </div>
-
-          <div style="display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;">
-            <button class="btn-apply" onclick="injectWidgetIntoPreviewSite()" style="padding: 10px 18px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); font-size: 0.85rem; margin: 0; white-space: nowrap;">🛠️ Entegre Et</button>
-            <button class="btn-apply" onclick="openPreviewSiteInNewTab()" style="padding: 10px 18px; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); font-size: 0.85rem; margin: 0; white-space: nowrap;">🔗 Yeni Sekmede Aç</button>
-            <span id="preview-injection-status" style="font-size: 0.78rem; color: #94a3b8; margin-left: auto;"></span>
-          </div>
-
-          <div id="iframe-error-warning" style="display: none; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #fbbf24;">
-            ⚠️ <strong>Cross-Origin Kısıtlaması:</strong> Bu site iframe içinden doğrudan müdahaleye izin vermiyor. Aşağıdaki <strong>Konsol Kodunu</strong> kopyalayıp, sitenizi yeni sekmede açtıktan sonra F12 → Console'a yapıştırarak çalıştırın.
-          </div>
-
-          <div id="preview-console-code-wrapper" style="margin-bottom: 16px; display: none;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-              <label style="font-size: 0.85rem; font-weight: 600; color: #cbd5e1;">💻 Konsol Kodu <span style="font-weight: 400; color: #64748b; font-size: 0.75rem;">(F12 → Console'a yapıştır)</span></label>
-              <button class="copy-btn" onclick="copyPreviewConsoleCode()" style="position: static; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700;">📋 Kopyala</button>
-            </div>
-            <div style="padding: 12px; font-size: 0.78rem; max-height: 140px; overflow-y: auto; background: #06070d; border: 1px solid var(--border-color); border-radius: 12px;">
-              <pre id="preview-code-console" style="margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #a5f3fc; text-align: left; line-height: 1.5;"></pre>
-            </div>
-          </div>
-
-          <div style="border: 2px dashed var(--border-color); border-radius: 14px; overflow: hidden; background: #000; height: 500px; position: relative;">
-            <iframe id="preview-website-iframe" src="" style="width: 100%; height: 100%; border: none; background: #ffffff;"></iframe>
-            <div id="iframe-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0c111d; color: #94a3b8; gap: 12px; padding: 20px; text-align: center;">
-              <span style="font-size: 3rem;">🌐</span>
-              <div>
-                <h4 style="margin: 0; color: #ffffff;">Web Sitesi Yüklenmedi</h4>
-                <p style="margin: 6px 0 0 0; font-size: 0.8rem; max-width: 300px;">Lütfen test etmek istediğiniz web sitesinin URL adresini girip "Sitede Test Et / Yükle" butonuna basın.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- TAB 5: Website Live Preview & Injection removed -->
       </section>
 
       <!-- RIGHT COLUMN: Mockup E-Commerce Page -->
@@ -1375,9 +1333,6 @@ s.onload = () => window.ShoeFitWidget.init({
 
         const consoleCodeBox = document.getElementById('embed-code-console');
         if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;
-
-        const previewConsoleCodeBox = document.getElementById('preview-code-console');
-        if (previewConsoleCodeBox) previewConsoleCodeBox.innerText = consoleCode;
       }
 
       function applySettings(onlyStyle = false) {
@@ -1457,129 +1412,7 @@ s.onload = () => window.ShoeFitWidget.init({
         applySettings();
       }
 
-      function loadPreviewSite() {
-        const urlInput = document.getElementById('preview-site-url').value.trim();
-        if (!urlInput) {
-          alert('Lütfen geçerli bir web sitesi adresi girin.');
-          return;
-        }
 
-        let formattedUrl = urlInput;
-        if (!/^https?:\/\//i.test(formattedUrl)) {
-          formattedUrl = 'https://' + formattedUrl;
-        }
-
-        const iframe = document.getElementById('preview-website-iframe');
-        const placeholder = document.getElementById('iframe-placeholder');
-        const errorWarning = document.getElementById('iframe-error-warning');
-        const consoleWrapper = document.getElementById('preview-console-code-wrapper');
-        const statusSpan = document.getElementById('preview-injection-status');
-
-        placeholder.style.display = 'none';
-        iframe.src = formattedUrl;
-        errorWarning.style.display = 'none';
-
-        // Konsol kodunu her zaman göster
-        updateEmbedCode();
-        if (consoleWrapper) consoleWrapper.style.display = 'block';
-        if (statusSpan) statusSpan.textContent = '🔄 Yükleniyor...';
-
-        iframe.onload = function() {
-          try {
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            errorWarning.style.display = 'none';
-            if (statusSpan) statusSpan.innerHTML = '<span style="color: #10b981;">✓ Same-origin — Entegre Et butonu aktif</span>';
-          } catch (e) {
-            errorWarning.style.display = 'block';
-            if (statusSpan) statusSpan.innerHTML = '<span style="color: #fbbf24;">⚠ Cross-origin — Konsol kodu kullanın</span>';
-          }
-        };
-      }
-
-      function openPreviewSiteInNewTab() {
-        const urlInput = document.getElementById('preview-site-url').value.trim();
-        if (!urlInput) {
-          alert('Lütfen önce bir web sitesi adresi girin.');
-          return;
-        }
-        let formattedUrl = urlInput;
-        if (!/^https?:\/\//i.test(formattedUrl)) {
-          formattedUrl = 'https://' + formattedUrl;
-        }
-        window.open(formattedUrl, '_blank');
-      }
-
-      function copyPreviewConsoleCode() {
-        const codeText = document.getElementById('preview-code-console').innerText;
-        if (!codeText) {
-          alert('Lütfen önce embed kodunu oluşturun.');
-          return;
-        }
-        navigator.clipboard.writeText(codeText).then(() => {
-          alert('✓ Konsol kodu panoya kopyalandı! Sitenizin sekmesinde F12 → Console\'a yapıştırıp Enter\'a basın.');
-        });
-      }
-
-      function injectWidgetIntoPreviewSite() {
-        const iframe = document.getElementById('preview-website-iframe');
-        if (!iframe.src || iframe.src === 'about:blank' || document.getElementById('iframe-placeholder').style.display !== 'none') {
-          alert('Lütfen önce web sitenizi yükleyin.');
-          return;
-        }
-
-        const color = document.getElementById('opt-btn-color').value;
-        const textColor = document.getElementById('opt-btn-text').value;
-        const radius = document.getElementById('opt-radius').value;
-        const fontSizeEl = document.getElementById('opt-btn-font-size');
-        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
-        const lang = document.getElementById('opt-lang').value;
-        const preset = document.getElementById('opt-preset').value;
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        const insertPos = document.getElementById('opt-insert-position').value;
-        const sizeSel = document.getElementById('opt-size-selector').value;
-        const cartSel = document.getElementById('opt-cart-selector').value;
-
-        const sel = document.getElementById('opt-product');
-        const opt = sel.options[sel.selectedIndex];
-        const brand = opt.dataset.brand;
-        const statusSpan = document.getElementById('preview-injection-status');
-
-        try {
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-          
-          const existing = iframeDoc.querySelector('[data-ssw-host]');
-          if (existing) existing.remove();
-
-          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          const scriptSrc = isLocal ? window.location.origin + '/src/widget/embed.ts' : 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
-
-          const s = iframeDoc.createElement('script');
-          s.type = 'module';
-          s.src = scriptSrc;
-          s.setAttribute('data-store-id', 'STORE_DEMO');
-          s.setAttribute('data-product-id', 'prod-samba-12');
-          s.setAttribute('data-brand', brand);
-          s.setAttribute('data-size-system', 'EU');
-          s.setAttribute('data-target-selector', targetSel || '.store-btn-cart');
-          s.setAttribute('data-insert-position', insertPos);
-          s.setAttribute('data-button-color', color);
-          s.setAttribute('data-button-text-color', textColor);
-          s.setAttribute('data-border-radius', radius + 'px');
-          s.setAttribute('data-button-font-size', fontSize + 'px');
-          s.setAttribute('data-language', lang);
-          s.setAttribute('data-style-preset', preset);
-          s.setAttribute('data-size-selector', sizeSel);
-          s.setAttribute('data-cart-selector', cartSel);
-          s.async = true;
-
-          iframeDoc.body.appendChild(s);
-          if (statusSpan) statusSpan.innerHTML = '<span style="color: #10b981;">✓ Widget enjekte edildi!</span>';
-        } catch (e) {
-          console.error(e);
-          document.getElementById('iframe-error-warning').style.display = 'block';
-          if (statusSpan) statusSpan.innerHTML = '<span style="color: #fbbf24;">⚠ Cross-origin — Konsol kodu kullanın</span>';
-        }
-      }
 
       function logEvent(action, detail = {}) {
         const logBox = document.getElementById('events-log');

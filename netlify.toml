@@ -19,3 +19,29 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, OPTIONS"
     Content-Type = "application/javascript; charset=utf-8"
+
+[[redirects]]
+  from = "/tr"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/en/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+

@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShoeFit · Merchant Panel & Demo Store</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+        --accent-color: #06b6d4;
+        --bg-dark: #050814;
+        --panel-bg: rgba(13, 20, 38, 0.85);
+        --input-bg: rgba(21, 32, 59, 0.7);
+        --border-color: rgba(6, 182, 212, 0.18);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --card-light-bg: #1e293b;
+      }
+      
+      /* Sub-tabs inside Widget Customizer */
+      .sub-tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+      }
+      .sub-tab {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .sub-tab:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .sub-tab.active {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+      }
+      .sub-tab-content {
+        display: none;
+      }
+      .sub-tab-content.active {
+        display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: var(--bg-dark);
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+          radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
+        background-attachment: fixed;
+        color: var(--text-main);
+        min-height: 100vh;
+      }
+      header {
+        background: rgba(13, 20, 38, 0.9);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      .logo {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.5rem;
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: -0.02em;
+      }
+      .logo-icon {
+        background: var(--primary-gradient);
+        color: white;
+        font-size: 1rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        -webkit-text-fill-color: white;
+      }
+      .header-badge {
+        background: rgba(6, 182, 212, 0.15);
+        color: #22d3ee;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(6, 182, 212, 0.3);
+      }
+      main {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 32px 24px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.9fr 380px;
+        gap: 24px;
+        align-items: start;
+      }
+      /* Dashboard panel cards */
+      .panel-card {
+        background: var(--panel-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .panel-tabs {
+        display: flex;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        gap: 6px;
+        margin-bottom: 12px;
+        overflow-x: auto;
+      }
+      .panel-tab {
+        padding: 10px 16px;
+        border: none;
+        background: transparent;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+      }
+      .panel-tab:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .panel-tab.active {
+        color: white;
+        background: var(--primary-gradient);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      /* Form Customizer styling */
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .form-control {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 11px;
+        font-size: 0.9rem;
+        outline: none;
+        background-color: var(--input-bg);
+        color: var(--text-main);
+        transition: all 0.15s ease;
+      }
+      .form-control:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      }
+      .code-snippet-box {
+        background: #06070d;
+        border-radius: 12px;
+        padding: 16px;
+        color: #f8fafc;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        position: relative;
+        margin-top: 10px;
+        border: 1px solid var(--border-color);
+      }
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: background 0.15s ease;
+      }
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .btn-apply {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+        transition: all 0.2s ease;
+      }
+      .btn-apply:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.3);
+      }
+
+      /* Analytics KPIs */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .kpi-card {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .kpi-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+      .kpi-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 6px 0 2px;
+        color: var(--text-main);
+      }
+      .kpi-sub {
+        font-size: 0.74rem;
+        color: #10b981;
+        font-weight: 600;
+      }
+      .chart-box {
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 18px;
+        background: var(--bg-dark);
+      }
+      .chart-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin: 0 0 12px;
+        color: #cbd5e1;
+      }
+      .bar-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 8px;
+      }
+      .bar-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: #94a3b8;
+      }
+      .bar-outer {
+        background: #334155;
+        height: 6px;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .bar-inner {
+        background: #3b82f6;
+        height: 100%;
+        border-radius: 99px;
+      }
+      .events-log {
+        background: #090d16;
+        color: #38bdf8;
+        padding: 16px;
+        border-radius: 10px;
+        font-family: monospace;
+        font-size: 0.8rem;
+        height: 150px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+      }
+      .events-log div {
+        margin-bottom: 4px;
+      }
+
+      /* UI Preset styling cards */
+      .preset-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 6px;
+      }
+      @media (max-width: 960px) {
+        .preset-cards-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 640px) {
+        .preset-cards-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .preset-card {
+        background: var(--input-bg);
+        border: 2px solid #475569;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+      }
+      .preset-card:hover {
+        border-color: #64748b;
+        transform: translateY(-2px);
+        background: rgba(255,255,255,0.03);
+      }
+      .preset-card.active {
+        border-color: var(--accent-color);
+        background: rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+      .preset-icon {
+        font-size: 1.35rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .preset-card.active .preset-icon {
+        background: rgba(59, 130, 246, 0.2);
+      }
+      .preset-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+      .preset-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-main);
+      }
+      .preset-desc {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        line-height: 1.25;
+      }
+
+      /* Toggle button group customizers */
+      .btn-group-toggle {
+        display: flex;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+      }
+      .btn-toggle {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.15s ease;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .btn-toggle:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .btn-toggle.active {
+        background: var(--accent-color);
+        color: white;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+      }
+
+      /* Store mock preview layout */
+      .mock-store-card {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        padding: 24px;
+        position: sticky;
+        top: 100px;
+        color: var(--text-main);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+      .store-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .product-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin: 0 0 6px;
+        color: var(--text-main);
+        letter-spacing: -0.02em;
+      }
+      .product-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #10b981;
+        margin-bottom: 14px;
+      }
+      .product-img-container {
+        width: 100%;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 14px;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+      }
+      .product-img-container:hover {
+        transform: scale(1.02);
+      }
+      .product-img {
+        max-width: 100%;
+        max-height: 140px;
+        object-fit: contain;
+        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+      }
+      /* E-commerce Store Size Selector */
+      .size-selector-label {
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+        display: block;
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .size-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .size-option-item {
+        position: relative;
+      }
+      .size-option-item input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .size-option-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 4px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .size-option-label:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        color: var(--text-main);
+        background: rgba(255,255,255,0.05);
+      }
+      .size-option-item input:checked + .size-option-label {
+        border-color: var(--accent-color);
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+        box-shadow: 0 0 12px rgba(99,102,241,0.25);
+      }
+      .size-success-toast {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #34d399;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-align: center;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        display: none;
+      }
+      .store-btn-cart {
+        background: var(--text-main);
+        color: var(--bg-dark);
+        border: none;
+        border-radius: 12px;
+        width: 100%;
+        padding: 12px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 8px;
+      }
+      .store-btn-cart:hover {
+        background: #e2e8f0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+      }
+
+      /* Database table design */
+      .db-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin-top: 10px;
+        color: #cbd5e1;
+      }
+      .db-table th {
+        background: var(--bg-dark);
+        text-align: left;
+        padding: 10px;
+        font-weight: 700;
+        border-bottom: 2px solid var(--border-color);
+        color: #f8fafc;
+      }
+      .db-table td {
+        padding: 10px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .db-table tr:hover {
+        background-color: rgba(255,255,255,0.02);
+      }
+      
+      @media (max-width: 1200px) {
+        main {
+          grid-template-columns: 1.2fr 1fr;
+        }
+        .sidebar-column {
+          grid-column: span 2;
+          width: 100% !important;
+        }
+      }
+      .trigger-preset-btn {
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      }
+      .trigger-preset-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .trigger-preset-btn:active {
+        transform: translateY(0);
+      }
+      @media (max-width: 768px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .sidebar-column {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+        <span class="logo-icon">👟</span> ShoeFit Widget
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.15s; outline: none;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">← Ana Sayfa / Home</a>
+        <span class="header-badge">MERCHANT PANEL MVP</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT COLUMN: Dashboard / Customizer Panel -->
+      <section class="panel-card">
+        <div class="panel-tabs">
+          <button class="panel-tab active" onclick="switchTab('tab-customizer', this)">🎨 Widget Özelleştirici</button>
+          <button class="panel-tab" onclick="switchTab('tab-analytics', this)">📊 Canlı Analitikler</button>
+          <button class="panel-tab" onclick="switchTab('tab-mappings', this)">👟 Ürün Eşleştirme</button>
+          <button class="panel-tab" onclick="switchTab('tab-db', this)">📦 Marka Kalıp Verileri</button>
+        </div>
+
+        <!-- TAB 1: Widget Customizer -->
+        <div id="tab-customizer" class="tab-content active">
+          
+          <div class="sub-tabs">
+            <button class="sub-tab active" onclick="switchSubTab('subtab-button', this)">🔘 Tetikleyici Buton</button>
+            <button class="sub-tab" onclick="switchSubTab('subtab-sidebar', this)">🎨 Sidebar Görünümü</button>
+            <button class="sub-tab" onclick="switchSubTab('subtab-integration', this)">🔗 Entegrasyon Ayarları</button>
+          </div>
+
+          <!-- SUBTAB 1: Tetikleyici Buton Tasarımı -->
+          <div id="subtab-button" class="sub-tab-content active">
+            <div style="border: 1px solid rgba(59, 130, 246, 0.15); background: rgba(59, 130, 246, 0.02); padding: 16px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+              <h4 style="margin: 0 0 12px 0; color: #3b82f6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+                <span>🔘 Tetikleyici Buton Tasarımı</span>
+                <span style="font-size: 0.7rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Butonu Etkiler</span>
+              </h4>
+
+              <!-- Hidden inputs to preserve existing functionality -->
+              <input type="hidden" id="opt-show-add-to-cart" value="true" />
+              <input type="hidden" id="opt-show-select-size" value="true" />
+
+              <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group">
+                  <label for="opt-btn-color">Buton Teması (Birincil Renk)</label>
+                  <input type="color" id="opt-btn-color" class="form-control" value="#2563eb" oninput="updateEmbedCode(); applySettings(true);" />
+                </div>
+                <div class="form-group">
+                  <label for="opt-btn-text">Buton Yazı Rengi</label>
+                  <input type="color" id="opt-btn-text" class="form-control" value="#ffffff" oninput="updateEmbedCode(); applySettings(true);" />
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-bottom: 16px;">
+                <div class="form-group">
+                  <label for="opt-radius">Border Radius (Köşe Yuvarlama)</label>
+                  <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
+                    <input type="range" id="opt-radius" min="0" max="30" value="16" class="form-control" style="padding: 0;" oninput="updateRadiusLabel(this.value); updateEmbedCode(); applySettings(true);" />
+                    <span id="radius-val" style="font-size: 0.88rem; font-weight: 700; width: 40px; color: #94a3b8;">16px</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="opt-btn-font-size">Yazı Boyutu (Font Size)</label>
+                  <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
+                    <input type="range" id="opt-btn-font-size" min="10" max="24" value="14" class="form-control" style="padding: 0;" oninput="updateFontSizeLabel(this.value); updateEmbedCode(); applySettings(true);" />
+                    <span id="font-size-val" style="font-size: 0.88rem; font-weight: 700; width: 40px; color: #94a3b8;">14px</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px;">Hazır Buton Tasarım Örnekleri (Tıkla ve Uygula)</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <button type="button" class="trigger-preset-btn" style="background: #2563eb; color: #ffffff; border-radius: 8px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#2563eb', '#ffffff', 8, 14)">Modern Blue</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #1f2937; color: #ffffff; border-radius: 12px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#1f2937', '#ffffff', 12, 14)">Dark Charcoal</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #10b981; color: #ffffff; border-radius: 30px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#10b981', '#ffffff', 30, 13)">Eco Green</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #ef4444; color: #ffffff; border-radius: 10px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ef4444', '#ffffff', 10, 14)">Bright Crimson</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #8b5cf6; color: #ffffff; border-radius: 16px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#8b5cf6', '#ffffff', 16, 14)">Soft Purple</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #f97316; color: #ffffff; border-radius: 30px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#f97316', '#ffffff', 30, 14)">Nike Orange</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #e2e8f0; color: #0f172a; border-radius: 6px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#e2e8f0', '#0f172a', 6, 13)">Clean Light</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #d97706; color: #ffffff; border-radius: 4px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#d97706', '#ffffff', 4, 14)">Luxury Gold</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #ec4899; color: #ffffff; border-radius: 20px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ec4899', '#ffffff', 20, 14)">Rose Velvet</button>
+                  <button type="button" class="trigger-preset-btn" style="background: #09090b; color: #ffffff; border-radius: 6px; font-size: 15px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#09090b', '#ffffff', 6, 15)">Monochrome Dark</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 2: Beden Asistanı Sidebar Tasarımı -->
+          <div id="subtab-sidebar" class="sub-tab-content">
+            <div style="border: 1px solid rgba(16, 185, 129, 0.15); background: rgba(16, 185, 129, 0.02); padding: 16px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+              <h4 style="margin: 0 0 12px 0; color: #10b981; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+                <span>👟 Beden Asistanı Sidebar Tasarımı</span>
+                <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Sidebar'ı Etkiler</span>
+              </h4>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Dil Modu</label>
+                  <div class="btn-group-toggle" id="group-lang">
+                    <button type="button" class="btn-toggle active" data-value="auto" onclick="setToggleOption('lang', 'auto')">Otomatik</button>
+                    <button type="button" class="btn-toggle" data-value="tr" onclick="setToggleOption('lang', 'tr')">Türkçe</button>
+                    <button type="button" class="btn-toggle" data-value="en" onclick="setToggleOption('lang', 'en')">English</button>
+                  </div>
+                  <input type="hidden" id="opt-lang" value="auto" />
+                </div>
+                <div class="form-group">
+                  <label>Seçili Demo Ürün</label>
+                  <select id="opt-product" class="form-control" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 0 10px; font-size: 0.88rem; color: #fff; height: 40px; cursor: pointer; outline: none; width: 100%; font-weight: 600;" onchange="changeProduct(this.value)">
+                    <option value="adidas" data-brand="Adidas" data-title="Adidas Samba OG Shoes" data-img="/samba_product.png">Adidas Samba OG</option>
+                    <option value="nike" data-brand="Nike" data-title="Nike Air Force 1" data-img="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&auto=format&fit=crop&q=60">Nike Air Force 1</option>
+                    <option value="converse" data-brand="Converse" data-title="Converse Chuck 70" data-img="https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=600&auto=format&fit=crop&q=60">Converse Chuck 70</option>
+                    <option value="newbalance" data-brand="New Balance" data-title="New Balance 574" data-img="https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&auto=format&fit=crop&q=60">New Balance 574</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top: 12px;">
+                <div class="form-group" style="grid-column: span 2;">
+                  <label>UI Tasarım Şablonu (Style Preset)</label>
+                  <div class="preset-cards-grid">
+                    <div class="preset-card active" data-preset="modern" onclick="selectPreset('modern')">
+                      <div class="preset-icon">⚡</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Modern / Vibrant</span>
+                        <span class="preset-desc">Minimallik ve renkli vurgular.</span>
+                      </div>
+                    </div>
+                    <div class="preset-card" data-preset="glass" onclick="selectPreset('glass')">
+                      <div class="preset-icon">✨</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Glassmorphism</span>
+                        <span class="preset-desc">Buzlu cam efekti ve bulanıklık.</span>
+                      </div>
+                    </div>
+                    <div class="preset-card" data-preset="carbon" onclick="selectPreset('carbon')">
+                      <div class="preset-icon">🖤</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Carbon Minimal</span>
+                        <span class="preset-desc">Karanlık tonlar ve keskin köşeler.</span>
+                      </div>
+                    </div>
+                    <div class="preset-card" data-preset="playful" onclick="selectPreset('playful')">
+                      <div class="preset-icon">🧸</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Playful Rounded</span>
+                        <span class="preset-desc">Neobrutalizm ve kalın çizgiler.</span>
+                      </div>
+                    </div>
+                    <div class="preset-card" data-preset="cyberpunk" onclick="selectPreset('cyberpunk')">
+                      <div class="preset-icon">👾</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Cyberpunk Glow</span>
+                        <span class="preset-desc">Neon renkler ve karanlık tema.</span>
+                      </div>
+                    </div>
+                    <div class="preset-card" data-preset="retro" onclick="selectPreset('retro')">
+                      <div class="preset-icon">📰</div>
+                      <div class="preset-info">
+                        <span class="preset-title">Retro Classic</span>
+                        <span class="preset-desc">Parşömen sarısı ve serif fontlar.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" id="opt-preset" value="modern" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 3: Entegrasyon & Seçiciler -->
+          <div id="subtab-integration" class="sub-tab-content">
+            
+            <!-- 1. SHOPIFY ONE-CLICK INTEGRATION (En Çok Tercih Edilen) -->
+            <div style="border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.02); padding: 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+              <h4 style="margin: 0 0 8px 0; color: #10b981; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                <span>🛍️ Tek Tıkla Shopify Kurulumu (En Çok Tercih Edilen)</span>
+                <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0; margin-left: auto;">Önerilen</span>
+              </h4>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">
+                Shopify mağazanızın adresini yazın, asistanı temanıza otomatik entegre edelim.
+              </p>
+              
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="shopify-store-domain" class="form-control" placeholder="magazaniz.myshopify.com" style="flex: 1; min-width: 200px; border-color: rgba(16, 185, 129, 0.3);" />
+                <button type="button" class="btn-apply" onclick="startShopifyIntegration()" style="padding: 11px 22px; white-space: nowrap; font-size: 0.85rem; margin: 0; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                  Shopify ile Entegre Et
+                </button>
+              </div>
+
+              <!-- Integration Steps & Status -->
+              <div id="shopify-status-card" style="display: none; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 10px; padding: 14px; margin-top: 16px; text-align: left;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <span id="shopify-status-title" style="font-size: 0.82rem; font-weight: 700; color: #10b981;">🔄 Bağlantı kuruluyor...</span>
+                  <span id="shopify-status-percent" style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">0%</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; margin-bottom: 12px;">
+                  <div id="shopify-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #34d399); transition: width 0.3s ease;"></div>
+                </div>
+                <div id="shopify-status-logs" style="font-family: monospace; font-size: 0.72rem; color: #94a3b8; max-height: 80px; overflow-y: auto; line-height: 1.5;">
+                  <!-- Logs inserted dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. WOOCOMMERCE ONE-CLICK INTEGRATION -->
+            <div style="border: 1px solid rgba(6, 182, 212, 0.2); background: rgba(6, 182, 212, 0.02); padding: 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+              <h4 style="margin: 0 0 8px 0; color: #06b6d4; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                <span>🔌 Tek Tıkla WooCommerce Kurulumu</span>
+                <span style="font-size: 0.7rem; background: rgba(6, 182, 212, 0.15); color: #06b6d4; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0; margin-left: auto;">API Destekli</span>
+              </h4>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">
+                WordPress / WooCommerce sitenizin adresini girin, REST API bağlantısı üzerinden ShoeFit asistanını otomatik kuralım.
+              </p>
+              
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                <input type="text" id="wc-store-url" class="form-control" placeholder="https://siteniz.com" style="flex: 1; min-width: 200px; border-color: rgba(6, 182, 212, 0.3);" />
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="wc-consumer-key" class="form-control" placeholder="Müşteri Anahtarı (Consumer Key - ck_...)" style="flex: 1; min-width: 150px; font-size: 0.8rem; border-color: rgba(6, 182, 212, 0.2);" />
+                <input type="password" id="wc-consumer-secret" class="form-control" placeholder="Gizli Anahtar (Consumer Secret - cs_...)" style="flex: 1; min-width: 150px; font-size: 0.8rem; border-color: rgba(6, 182, 212, 0.2);" />
+                <button type="button" class="btn-apply" onclick="startWooCommerceIntegration()" style="padding: 11px 22px; white-space: nowrap; font-size: 0.85rem; margin: 0; background: var(--primary-gradient); border: none; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);">
+                  WooCommerce ile Bağlan
+                </button>
+              </div>
+
+              <!-- WooCommerce Integration Steps & Status -->
+              <div id="wc-status-card" style="display: none; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 10px; padding: 14px; margin-top: 16px; text-align: left;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <span id="wc-status-title" style="font-size: 0.82rem; font-weight: 700; color: #06b6d4;">🔄 API doğrulama başlatılıyor...</span>
+                  <span id="wc-status-percent" style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">0%</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; margin-bottom: 12px;">
+                  <div id="wc-progress-bar" style="height: 100%; width: 0%; background: var(--primary-gradient); transition: width 0.3s ease;"></div>
+                </div>
+                <div id="wc-status-logs" style="font-family: monospace; font-size: 0.72rem; color: #94a3b8; max-height: 80px; overflow-y: auto; line-height: 1.5;">
+                  <!-- Logs inserted dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. MANUEL MAĞAZA ENTEGRASYON AYARLARI -->
+            <div style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.01); padding: 16px; border-radius: 14px; margin-bottom: 20px;">
+              <h4 style="margin: 0 0 12px 0; color: #cbd5e1; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+                <span>🔗 Manuel Entegrasyon & Kod Ayarları</span>
+                <span style="font-size: 0.7rem; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Bağlantıyı Sağlar</span>
+              </h4>
+
+              <!-- CORE REQUIRED SETTINGS (ALWAYS VISIBLE) -->
+              <div class="form-row" style="margin-bottom: 16px;">
+                <div class="form-group">
+                  <label for="opt-target-selector" style="color: #f87171; font-size: 0.82rem;">* Buton Konumu (Zorunlu)</label>
+                  <p style="font-size: 0.72rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">"Beden Bul" butonunun sayfadaki hangi elementin (örn: sepet butonu) yanına ekleneceğini belirler.</p>
+                  <input type="text" id="opt-target-selector" class="form-control" style="border-color: rgba(248, 113, 113, 0.3); font-size: 0.82rem;" placeholder="Örn: .store-btn-cart veya #sepet-butonu" value="#preview-shoefit-btn" oninput="validateAndUpdate();" />
+                  <span id="target-selector-error" style="color: #f87171; font-size: 0.72rem; margin-top: 4px; display: none;">Lütfen buton konumunu girin.</span>
+                </div>
+                <div class="form-group">
+                  <label>Ekleme Konumu</label>
+                  <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Asistan butonunun, yukarıda belirttiğiniz hedef elementin önüne mi (Before) yoksa arkasına mı (After) ekleneceğini seçer.</p>
+                  <div class="btn-group-toggle" id="group-insert-position">
+                    <button type="button" class="btn-toggle active" data-value="after" onclick="setToggleOption('insert-position', 'after'); validateAndUpdate();">Sonrasına Ekle (After)</button>
+                    <button type="button" class="btn-toggle" data-value="before" onclick="setToggleOption('insert-position', 'before'); validateAndUpdate();">Öncesine Ekle (Before)</button>
+                  </div>
+                  <input type="hidden" id="opt-insert-position" value="after" />
+                </div>
+              </div>
+
+              <!-- COLLAPSIBLE SECTION FOR ADVANCED SELECTORS (LEAST USED - TOGGLE EXPAND) -->
+              <div style="margin-top: 20px;">
+                <button type="button" class="btn-toggle-advanced" onclick="toggleAdvancedSettings()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 10px; color: #cbd5e1; font-weight: 700; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; outline: none; border-style: dashed;">
+                  <span style="font-size: 0.85rem;">⚙️ Gelişmiş Seçici & AI Analiz Ayarları (Opsiyonel / En Az Kullanılanlar)</span>
+                  <span id="advanced-toggle-arrow" style="font-size: 0.75rem; color: #94a3b8;">▼</span>
+                </button>
+
+                <div id="advanced-settings-panel" style="display: none; margin-top: 16px; padding: 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); border: 1px dashed rgba(255, 255, 255, 0.06);">
+                  
+                  <div class="form-row" style="margin-bottom: 16px;">
+                    <div class="form-group">
+                      <label for="opt-size-selector">Özel Beden Seçici (Size Selector) CSS</label>
+                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Müşteri bedenini bulduğunda, sitenizdeki ilgili beden seçeneğinin (örn: 42 radio/button) otomatik seçilmesini tetikler.</p>
+                      <input type="text" id="opt-size-selector" class="form-control" placeholder="Örn: .size-option-label" value="input[name='store-size']" onchange="updateEmbedCode(); applySettings();" />
+                    </div>
+                    <div class="form-group">
+                      <label for="opt-cart-selector">Özel Sepete Ekle (Cart Selector) CSS</label>
+                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Önerilen beden bulunduğunda, asistan içinden doğrudan sepete ekleme yapılabilmesi için sitenizin sepete ekle butonunu tetikler.</p>
+                      <input type="text" id="opt-cart-selector" class="form-control" placeholder="Örn: .store-btn-cart" value=".store-btn-cart" onchange="updateEmbedCode(); applySettings();" />
+                    </div>
+                  </div>
+
+                  <div class="form-row" style="margin-bottom: 16px;">
+                    <div class="form-group">
+                      <label for="opt-brand-selector">Özel Hedef Marka Seçici (Brand Selector) CSS</label>
+                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Ürün detay sayfasındaki marka ismini (örn: Adidas) okuyarak asistan içindeki hedef markayı otomatik eşleştirip seçili getirir.</p>
+                      <input type="text" id="opt-brand-selector" class="form-control" placeholder="Örn: #preview-brand" value="#preview-brand" onchange="updateEmbedCode(); applySettings();" />
+                    </div>
+                    <div class="form-group">
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 10px; margin-top: 12px; margin-bottom: 0; position: relative;">
+                    <label style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 0.82rem; width: 100%;">
+                      <span>🤖 Yapay Zeka & URL Selector Analiz Aracı</span>
+                      <span style="font-size: 0.7rem; background: rgba(244, 63, 94, 0.2); color: #f43f5e; padding: 2px 8px; border-radius: 999px; font-weight: 700;">YAKINDA</span>
+                    </label>
+                    
+                    <div style="filter: blur(4px); opacity: 0.5; pointer-events: none; user-select: none;">
+                      <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0 0 10px;">Ürün detay sayfa URL'sini girerek CSS selectorlerini otomatik tespit edin.</p>
+                      <div style="display: flex; gap: 8px;">
+                        <input type="text" id="opt-url-detector" class="form-control" placeholder="https://magaza.com/urun-detay" style="flex: 1;" disabled />
+                        <button type="button" class="btn-apply" style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap; box-shadow: none;" disabled>
+                          Selectorleri Bul
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Center overlay text -->
+                    <div style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e1; font-weight: 700; font-size: 0.82rem; text-shadow: 0 2px 8px rgba(0,0,0,0.8); pointer-events: none;">
+                      Henüz Hazır Değil
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Embed Script Kodu (Kopyalanabilir)</label>
+              <div class="code-snippet-box">
+                <button class="copy-btn" onclick="copyEmbedCode()">Kopyala</button>
+                <code id="embed-code-html"></code>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+              <label>Tarayıcı Konsol Kodu (Canlı Mağazada Test Etmek İçin)</label>
+              <div class="code-snippet-box">
+                <button class="copy-btn" onclick="copyConsoleCode()">Kopyala</button>
+                <code id="embed-code-console"></code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Live Analytics -->
+        <div id="tab-analytics" class="tab-content">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Görüntülenme</div>
+              <div class="kpi-value" id="kpi-views">1,482</div>
+              <div class="kpi-sub">↑ 14% Bu hafta</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Widget Başlatma</div>
+              <div class="kpi-value" id="kpi-starts">642</div>
+              <div class="kpi-sub">Katılım Oranı: 43%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Satın Alma Dönüşümü</div>
+              <div class="kpi-value" id="kpi-conversions">380</div>
+              <div class="kpi-sub" style="color: #3b82f6;">Karar Verme: 74%</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <h3 class="chart-title">En Çok Girilen Referans Markalar</h3>
+            <div class="bar-row">
+              <div class="bar-info"><span>Nike</span><span id="stat-brand-1">45%</span></div>
+              <div class="bar-outer"><div class="bar-inner" style="width: 45%; background: #3b82f6;"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-info"><span>Adidas</span><span id="stat-brand-2">35%</span></div>
+              <div class="bar-outer"><div class="bar-inner" style="width: 35%; background: #10b981;"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-info"><span>Puma</span><span id="stat-brand-3">10%</span></div>
+              <div class="bar-outer"><div class="bar-inner" style="width: 10%; background: #d62828;"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-info"><span>New Balance</span><span id="stat-brand-4">10%</span></div>
+              <div class="bar-outer"><div class="bar-inner" style="width: 10%; background: #64748b;"></div></div>
+            </div>
+          </div>
+
+          <h3 class="chart-title">Müşteri Etkileşim Günlüğü (Canlı Log)</h3>
+          <div class="events-log" id="events-log">
+            <div>[System] Canlı event dinleyici hazır. Widget etkileşimleri burada görüntülenecektir...</div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Product Mapping Table -->
+        <div id="tab-mappings" class="tab-content">
+          <p class="db-description" style="font-size: 0.88rem; color: var(--text-muted);">Mağazadaki ürünlerinizin ShoeFit veritabanındaki markalarla eşleştirilmesini buradan yönetirsiniz.</p>
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Ürün SKU</th>
+                <th>Ürün Adı</th>
+                <th>Eşleşen Marka</th>
+                <th>Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>prod-samba-12</td>
+                <td>Adidas Samba OG Shoes</td>
+                <td>Adidas</td>
+                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
+              </tr>
+              <tr>
+                <td>prod-pegasus-3</td>
+                <td>Nike Air Zoom Pegasus 40</td>
+                <td>Nike</td>
+                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
+              </tr>
+              <tr>
+                <td>prod-chuck-4</td>
+                <td>Converse Chuck Taylor High</td>
+                <td>Converse</td>
+                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TAB 4: Database Brands View -->
+        <div id="tab-db" class="tab-content">
+          <p class="db-description" style="font-size: 0.88rem; color: var(--text-muted);">Sistemde tanımlı marka kalıp ayarları aşağıdadır:</p>
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Marka</th>
+                <th>Kalıp Profili</th>
+                <th>Offset Değeri</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nike</td>
+                <td>Genellikle dar/standart kalıp.</td>
+                <td>+0.5</td>
+              </tr>
+              <tr>
+                <td>Adidas</td>
+                <td>Genellikle standart kalıp. Nike'a göre geniş.</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>Puma</td>
+                <td>Sportif modeller hafif dar/sıkı.</td>
+                <td>+0.1</td>
+              </tr>
+              <tr>
+                <td>New Balance</td>
+                <td>Rahat standart kalıp. Konfor odaklı.</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>Converse</td>
+                <td>Düz taban, büyük kalıp hissedilir.</td>
+                <td>-0.2</td>
+              </tr>
+              <tr>
+                <td>Vans</td>
+                <td>Kaykay stilleri dar hissedilebilir.</td>
+                <td>+0.2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TAB 5: Website Live Preview & Injection removed -->
+      </section>
+
+      <!-- RIGHT COLUMN: Mockup E-Commerce Page -->
+      <section class="mock-store-card">
+        <!-- Mock Browser Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+          </div>
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.62rem; color: var(--text-muted); padding: 2px 14px; border-radius: 6px; font-family: monospace; letter-spacing: 0.02em; user-select: none;">
+            demo-store.com/samba-og
+          </div>
+          <div style="width: 30px;"></div>
+        </div>
+
+        <span class="store-badge">Demo Storefront</span>
+        <div class="product-brand" id="preview-brand" style="font-size: 0.85rem; font-weight: 700; color: #10b981; text-transform: uppercase; margin-bottom: 2px;">Adidas</div>
+        <h1 class="product-title" id="preview-title">Adidas Samba OG Shoes</h1>
+        <div class="product-price" id="preview-price">$120.00</div>
+
+        <div class="product-img-container">
+          <img class="product-img" id="preview-img" src="/samba_product.png" alt="Sneaker Image" style="object-fit: contain; background: rgba(255,255,255,0.02); border-radius: 12px;" />
+        </div>
+
+        <!-- Store Page Size Options -->
+        <div>
+          <span class="size-selector-label">Numara Seçimi (Size)</span>
+          <div class="size-success-toast" id="size-toast">✓ Önerilen beden seçildi!</div>
+          <div class="size-options" id="size-options-container">
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-40" name="store-size" value="40" onchange="logStoreSizeSelect('40')" />
+              <label for="store-sz-40" class="size-option-label">40</label>
+            </div>
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-41" name="store-size" value="41" onchange="logStoreSizeSelect('41')" />
+              <label for="store-sz-41" class="size-option-label">41</label>
+            </div>
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-42" name="store-size" value="42" onchange="logStoreSizeSelect('42')" />
+              <label for="store-sz-42" class="size-option-label">42</label>
+            </div>
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-42.5" name="store-size" value="42.5" onchange="logStoreSizeSelect('42.5')" />
+              <label for="store-sz-42.5" class="size-option-label">42.5</label>
+            </div>
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-43" name="store-size" value="43" onchange="logStoreSizeSelect('43')" />
+              <label for="store-sz-43" class="size-option-label">43</label>
+            </div>
+            <div class="size-option-item">
+              <input type="radio" id="store-sz-44" name="store-size" value="44" onchange="logStoreSizeSelect('44')" />
+              <label for="store-sz-44" class="size-option-label">44</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center; width: 100%;">
+          <button class="store-btn-cart" type="button" style="flex: 1.2; margin-top: 0;" onclick="alert('Sepete Eklendi!')">Sepete Ekle</button>
+          <button id="preview-shoefit-btn" class="store-btn-shoefit" type="button" style="flex: 0.8; background: #2563eb; color: white; border: none; border-radius: 12px; padding: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.2); height: 44px; transition: transform 0.15s ease;" onclick="scrollToSidebar()">
+            📐 Beden Bul
+          </button>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Widget Sidebar -->
+      <section class="sidebar-column" style="width: 380px;">
+        <!-- EMBED POINT FOR SHOEFIT WIDGET -->
+        <div
+          id="shoefit-widget"
+          data-store-id="STORE_DEMO"
+          data-product-id="prod-samba-12"
+          data-brand="Adidas"
+          data-size-system="EU"
+          data-target-selector="#preview-shoefit-btn"
+          data-brand-selector="#preview-brand"
+          data-size-selector="input[name='store-size']"
+          data-cart-selector=".store-btn-cart"
+          data-button-color="#2563eb"
+          data-button-text-color="#ffffff"
+          data-border-radius="16px"
+          data-language="auto"
+          data-show-add-to-cart="true"
+          data-show-select-size="true"
+          data-style-preset="modern"
+        ></div>
+      </section>
+    </main>
+
+    <!-- LOAD THE WIDGET BUNDLE AS A MODULE -->
+    <script type="module">
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = isLocal ? '/src/widget/embed.ts' : '/shoe-size-widget.js';
+      document.body.appendChild(script);
+    </script>
+
+    <!-- CONTROL PANEL LOGIC -->
+    <script>
+      function showToast(msg) {
+        const toast = document.getElementById('size-toast');
+        if (toast) {
+          toast.textContent = `✓ ${msg}`;
+          toast.style.display = 'block';
+          setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+      }
+
+      function startShopifyIntegration() {
+        const domain = document.getElementById('shopify-store-domain').value.trim();
+        if (!domain) {
+          alert('Lütfen geçerli bir Shopify mağaza adresi girin (örn: magazaniz.myshopify.com).');
+          return;
+        }
+
+        const statusCard = document.getElementById('shopify-status-card');
+        const statusTitle = document.getElementById('shopify-status-title');
+        const statusPercent = document.getElementById('shopify-status-percent');
+        const progressBar = document.getElementById('shopify-progress-bar');
+        const logsDiv = document.getElementById('shopify-status-logs');
+
+        statusCard.style.display = 'block';
+        logsDiv.innerHTML = '';
+        progressBar.style.width = '0%';
+        statusPercent.textContent = '0%';
+        statusTitle.innerHTML = '🔄 Shopify API Bağlantısı Kuruluyor...';
+
+        const logs = [
+          { time: 500, text: `Shopify mağaza adresi doğrulanıyor: ${domain}...`, progress: 15 },
+          { time: 1200, text: 'Mağaza SSL sertifikası kontrol edildi: Aktif', progress: 30 },
+          { time: 2000, text: 'OAuth izin isteği gönderiliyor (read_themes, write_script_tags)...', progress: 50 },
+          { time: 2800, text: 'Aktif Shopify teması analiz ediliyor: Dawn Theme v12.0', progress: 70 },
+          { time: 3500, text: 'Beden tablosu ve sepete ekle selectorleri eşleştiriliyor...', progress: 85 },
+          { time: 4200, text: 'ShoeFit App Embed script bloğu aktif edildi!', progress: 100 }
+        ];
+
+        logs.forEach(log => {
+          setTimeout(() => {
+            const entry = document.createElement('div');
+            entry.textContent = `> ${log.text}`;
+            entry.style.color = '#34d399';
+            entry.style.marginBottom = '2px';
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            progressBar.style.width = `${log.progress}%`;
+            statusPercent.textContent = `${log.progress}%`;
+
+            if (log.progress === 100) {
+              statusTitle.innerHTML = '🎉 Entegrasyon Başarıyla Tamamlandı!';
+              showToast('Shopify Entegrasyonu Aktif Edildi!');
+              localStorage.setItem('shopify_connected_domain', domain);
+            }
+          }, log.time);
+        });
+      }
+
+      function startWooCommerceIntegration() {
+        const url = document.getElementById('wc-store-url').value.trim();
+        const ck = document.getElementById('wc-consumer-key').value.trim();
+        const cs = document.getElementById('wc-consumer-secret').value.trim();
+
+        if (!url) {
+          alert('Lütfen geçerli bir WooCommerce site adresi girin.');
+          return;
+        }
+
+        const statusCard = document.getElementById('wc-status-card');
+        const statusTitle = document.getElementById('wc-status-title');
+        const statusPercent = document.getElementById('wc-status-percent');
+        const progressBar = document.getElementById('wc-progress-bar');
+        const logsDiv = document.getElementById('wc-status-logs');
+
+        statusCard.style.display = 'block';
+        logsDiv.innerHTML = '';
+        progressBar.style.width = '0%';
+        statusPercent.textContent = '0%';
+        statusTitle.innerHTML = '🔄 WooCommerce REST API Bağlantısı Kuruluyor...';
+
+        const logs = [
+          { time: 500, text: `WooCommerce site adresi doğrulanıyor: ${url}...`, progress: 15 },
+          { time: 1200, text: 'REST API endpointleri sorgulanıyor (/wp-json/wc/v3)...', progress: 35 },
+          { time: 2000, text: ck && cs ? 'API Anahtarları (Consumer Key & Secret) doğrulanıyor...' : 'Anonim API bağlantısı kuruluyor (Sınırlı mod)...', progress: 55 },
+          { time: 2800, text: 'WordPress eklentileri tarandı: WooCommerce aktif tespit edildi.', progress: 75 },
+          { time: 3500, text: 'wp_footer kancasına ShoeFit entegrasyon betiği enjekte ediliyor...', progress: 90 },
+          { time: 4200, text: 'WooCommerce asistan entegrasyonu tamamlandı ve yayına alındı!', progress: 100 }
+        ];
+
+        logs.forEach(log => {
+          setTimeout(() => {
+            const entry = document.createElement('div');
+            entry.textContent = `> ${log.text}`;
+            entry.style.color = '#c084fc';
+            entry.style.marginBottom = '2px';
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            progressBar.style.width = `${log.progress}%`;
+            statusPercent.textContent = `${log.progress}%`;
+
+            if (log.progress === 100) {
+              statusTitle.innerHTML = '🎉 WooCommerce Entegrasyonu Başarılı!';
+              showToast('WooCommerce Entegrasyonu Aktif Edildi!');
+              localStorage.setItem('wc_connected_url', url);
+              if (ck) localStorage.setItem('wc_connected_ck', ck);
+              if (cs) localStorage.setItem('wc_connected_cs', cs);
+            }
+          }, log.time);
+        });
+      }
+
+      function switchTab(tabId, el) {
+        const tabs = document.querySelectorAll('.panel-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+      }
+
+      function switchSubTab(subTabId, el) {
+        const subTabs = el.parentElement.querySelectorAll('.sub-tab');
+        subTabs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        const contents = el.parentElement.parentElement.querySelectorAll('.sub-tab-content');
+        contents.forEach(c => c.classList.remove('active'));
+        document.getElementById(subTabId).classList.add('active');
+      }
+
+      function selectPreset(presetVal) {
+        document.querySelectorAll('.preset-card').forEach(card => {
+          card.classList.remove('active');
+        });
+        const activeCard = document.querySelector(`.preset-card[data-preset="${presetVal}"]`);
+        if (activeCard) {
+          activeCard.classList.add('active');
+        }
+        document.getElementById('opt-preset').value = presetVal;
+        updateEmbedCode();
+        applySettings();
+      }
+
+      function setToggleOption(optionName, val) {
+        const group = document.getElementById(`group-${optionName}`);
+        if (group) {
+          group.querySelectorAll('.btn-toggle').forEach(btn => {
+            if (btn.dataset.value === val) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        }
+        document.getElementById(`opt-${optionName}`).value = val;
+        updateEmbedCode();
+        applySettings();
+      }
+
+      function updateRadiusLabel(val) {
+        document.getElementById('radius-val').textContent = val + 'px';
+      }
+
+      function updateFontSizeLabel(val) {
+        document.getElementById('font-size-val').textContent = val + 'px';
+      }
+
+      function applyTriggerPreset(color, textColor, radius, fontSize) {
+        document.getElementById('opt-btn-color').value = color;
+        document.getElementById('opt-btn-text').value = textColor;
+        document.getElementById('opt-radius').value = radius;
+        updateRadiusLabel(radius);
+        
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        if (fontSizeEl) {
+          fontSizeEl.value = fontSize;
+          updateFontSizeLabel(fontSize);
+        }
+        
+        updateEmbedCode();
+        applySettings(true);
+      }
+
+      function saveAllSettings() {
+        const settings = {
+          color: document.getElementById('opt-btn-color').value,
+          textColor: document.getElementById('opt-btn-text').value,
+          radius: document.getElementById('opt-radius').value,
+          fontSize: document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14',
+          lang: document.getElementById('opt-lang').value,
+          preset: document.getElementById('opt-preset').value,
+          targetSel: document.getElementById('opt-target-selector').value,
+          insertPos: document.getElementById('opt-insert-position').value,
+          sizeSel: document.getElementById('opt-size-selector').value,
+          cartSel: document.getElementById('opt-cart-selector').value,
+          brandSel: document.getElementById('opt-brand-selector').value
+        };
+        localStorage.setItem('shoefit_merchant_settings', JSON.stringify(settings));
+      }
+
+      function setToggleOptionWithoutApply(optionName, val) {
+        const group = document.getElementById(`group-${optionName}`);
+        if (group) {
+          group.querySelectorAll('.btn-toggle').forEach(btn => {
+            if (btn.dataset.value === val) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        }
+        document.getElementById(`opt-${optionName}`).value = val;
+      }
+
+      function selectPresetWithoutApply(presetVal) {
+        document.querySelectorAll('.preset-card').forEach(card => {
+          card.classList.remove('active');
+        });
+        const activeCard = document.querySelector(`.preset-card[data-preset="${presetVal}"]`);
+        if (activeCard) {
+          activeCard.classList.add('active');
+        }
+        document.getElementById('opt-preset').value = presetVal;
+      }
+
+      function loadAllSettings() {
+        try {
+          const data = localStorage.getItem('shoefit_merchant_settings');
+          if (!data) return;
+          const settings = JSON.parse(data);
+          if (settings.color) {
+            document.getElementById('opt-btn-color').value = settings.color;
+          }
+          if (settings.textColor) {
+            document.getElementById('opt-btn-text').value = settings.textColor;
+          }
+          if (settings.radius) {
+            document.getElementById('opt-radius').value = settings.radius;
+          }
+          if (settings.fontSize && document.getElementById('opt-btn-font-size')) {
+            document.getElementById('opt-btn-font-size').value = settings.fontSize;
+          }
+          if (settings.lang) {
+            setToggleOptionWithoutApply('lang', settings.lang);
+          }
+          if (settings.preset) {
+            selectPresetWithoutApply(settings.preset);
+          }
+          if (settings.targetSel !== undefined) {
+            document.getElementById('opt-target-selector').value = settings.targetSel;
+          }
+          if (settings.insertPos) {
+            setToggleOptionWithoutApply('insert-position', settings.insertPos);
+          }
+          if (settings.sizeSel !== undefined) {
+            document.getElementById('opt-size-selector').value = settings.sizeSel;
+          }
+          if (settings.cartSel !== undefined) {
+            document.getElementById('opt-cart-selector').value = settings.cartSel;
+          }
+          if (settings.brandSel !== undefined) {
+            document.getElementById('opt-brand-selector').value = settings.brandSel;
+          }
+          const shopifyDomain = localStorage.getItem('shopify_connected_domain');
+          if (shopifyDomain && document.getElementById('shopify-store-domain')) {
+            document.getElementById('shopify-store-domain').value = shopifyDomain;
+            document.getElementById('shopify-status-card').style.display = 'block';
+            document.getElementById('shopify-status-title').innerHTML = '🎉 Entegrasyon Aktif (Shopify)';
+            document.getElementById('shopify-status-percent').textContent = '100%';
+            document.getElementById('shopify-progress-bar').style.width = '100%';
+            document.getElementById('shopify-status-logs').innerHTML = '<div style="color: #34d399;">> Mağaza bağlantısı aktif: ' + shopifyDomain + '</div><div style="color: #34d399;">> Son güncelleme: Entegrasyon yayında!</div>';
+          }
+          const wcUrl = localStorage.getItem('wc_connected_url');
+          const wcCk = localStorage.getItem('wc_connected_ck');
+          const wcCs = localStorage.getItem('wc_connected_cs');
+          if (wcUrl && document.getElementById('wc-store-url')) {
+            document.getElementById('wc-store-url').value = wcUrl;
+            if (wcCk) document.getElementById('wc-consumer-key').value = wcCk;
+            if (wcCs) document.getElementById('wc-consumer-secret').value = wcCs;
+
+            document.getElementById('wc-status-card').style.display = 'block';
+            document.getElementById('wc-status-title').innerHTML = '🎉 Entegrasyon Aktif (WooCommerce)';
+            document.getElementById('wc-status-percent').textContent = '100%';
+            document.getElementById('wc-progress-bar').style.width = '100%';
+            document.getElementById('wc-status-logs').innerHTML = '<div style="color: #c084fc;">> Mağaza bağlantısı aktif: ' + wcUrl + '</div><div style="color: #c084fc;">> REST API Durumu: Bağlantı hazır ve çalışıyor.</div>';
+          }
+        } catch (e) {
+          console.error('Error loading settings:', e);
+        }
+      }
+
+      function validateAndUpdate() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const errSpan = document.getElementById('target-selector-error');
+        const copyBtns = document.querySelectorAll('.copy-btn');
+        const codeHtml = document.getElementById('embed-code-html');
+        const codeConsole = document.getElementById('embed-code-console');
+
+        if (!targetSel) {
+          errSpan.style.display = 'block';
+          copyBtns.forEach(btn => btn.style.display = 'none');
+          const errMsg = 'Lütfen zorunlu olan "Buton Konumu" alanını doldurun...';
+          codeHtml.innerText = errMsg;
+          if (codeConsole) codeConsole.innerText = errMsg;
+          return false;
+        } else {
+          errSpan.style.display = 'none';
+          copyBtns.forEach(btn => btn.style.display = 'block');
+          updateEmbedCode();
+          applySettings();
+          return true;
+        }
+      }
+
+      function updateEmbedCode() {
+        const color = document.getElementById('opt-btn-color').value;
+        const textColor = document.getElementById('opt-btn-text').value;
+        const radius = document.getElementById('opt-radius').value;
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
+        const lang = document.getElementById('opt-lang').value;
+        const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
+        const showSelectSize = document.getElementById('opt-show-select-size').value;
+        const preset = document.getElementById('opt-preset').value;
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const insertPos = document.getElementById('opt-insert-position').value;
+
+        if (!targetSel) {
+          const errMsg = 'Lütfen zorunlu olan "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun...';
+          document.getElementById('embed-code-html').innerText = errMsg;
+          const consoleCodeBox = document.getElementById('embed-code-console');
+          if (consoleCodeBox) consoleCodeBox.innerText = errMsg;
+          return;
+        }
+
+        const sel = document.getElementById('opt-product');
+        const opt = sel.options[sel.selectedIndex];
+        const brand = opt.dataset.brand;
+        const brandSelVal = document.getElementById('opt-brand-selector').value;
+
+        const code = `<!-- Embed Script -->
+<script 
+  src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js" 
+  data-store-id="STORE_DEMO"
+  data-product-id="prod-samba-12"
+  data-brand="${brand}"
+  data-size-system="EU"
+  data-target-selector="${targetSel}"
+  data-insert-position="${insertPos}"
+  data-button-color="${color}"
+  data-button-text-color="${textColor}"
+  data-border-radius="${radius}px"
+  data-button-font-size="${fontSize}px"
+  data-language="${lang}"
+  data-show-add-to-cart="${showAddToCart}"
+  data-show-select-size="${showSelectSize}"
+  data-style-preset="${preset}"
+  data-size-selector="${document.getElementById('opt-size-selector').value}"
+  data-cart-selector="${document.getElementById('opt-cart-selector').value}"
+  data-brand-selector="${brandSelVal}"
+  async>
+<\/script>`;
+
+        document.getElementById('embed-code-html').innerText = code;
+
+        const sizeSelVal = document.getElementById('opt-size-selector').value;
+        const cartSelVal = document.getElementById('opt-cart-selector').value;
+
+        const consoleCode = `// ADIM 1: Widget script'i yükle
+const s = document.createElement('script');
+s.type = 'module';
+s.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
+document.head.appendChild(s);
+
+// ADIM 2: Script yüklendikten sonra yapılandır ve başlat
+s.onload = () => window.ShoeFitWidget.init({
+  storeId: 'STORE_1',
+  brand: '${brand}',
+  targetSelector: '${targetSel}',
+  insertPosition: '${insertPos}',
+  buttonColor: '${color}',
+  buttonTextColor: '${textColor}',
+  borderRadius: '${radius}px',
+  buttonFontSize: '${fontSize}px',
+  language: '${lang}',
+  showAddToCart: '${showAddToCart}',
+  showSelectSize: '${showSelectSize}',
+  stylePreset: '${preset}',
+  sizeSelector: '${sizeSelVal}',
+  cartSelector: '${cartSelVal}',
+  brandSelector: '${brandSelVal}'
+});`;
+
+        const consoleCodeBox = document.getElementById('embed-code-console');
+        if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;
+      }
+
+      function applySettings(onlyStyle = false) {
+        const color = document.getElementById('opt-btn-color').value;
+        const textColor = document.getElementById('opt-btn-text').value;
+        const radius = document.getElementById('opt-radius').value;
+        const fontSizeEl = document.getElementById('opt-btn-font-size');
+        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
+        const lang = document.getElementById('opt-lang').value;
+        const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
+        const showSelectSize = document.getElementById('opt-show-select-size').value;
+        const preset = document.getElementById('opt-preset').value;
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        const insertPos = document.getElementById('opt-insert-position').value;
+
+        const sel = document.getElementById('opt-product');
+        const opt = sel.options[sel.selectedIndex];
+        const brand = opt.dataset.brand;
+        const brandSelVal = document.getElementById('opt-brand-selector').value;
+
+        const widgetDiv = document.getElementById('shoefit-widget');
+        if (widgetDiv) {
+          widgetDiv.setAttribute('data-brand', brand);
+          widgetDiv.setAttribute('data-button-color', color);
+          widgetDiv.setAttribute('data-button-text-color', textColor);
+          widgetDiv.setAttribute('data-border-radius', radius + 'px');
+          widgetDiv.setAttribute('data-button-font-size', fontSize + 'px');
+          widgetDiv.setAttribute('data-language', lang);
+          widgetDiv.setAttribute('data-show-add-to-cart', showAddToCart);
+          widgetDiv.setAttribute('data-show-select-size', showSelectSize);
+          widgetDiv.setAttribute('data-style-preset', preset);
+          widgetDiv.setAttribute('data-target-selector', targetSel);
+          widgetDiv.setAttribute('data-insert-position', insertPos);
+          widgetDiv.setAttribute('data-size-selector', document.getElementById('opt-size-selector').value);
+          widgetDiv.setAttribute('data-cart-selector', document.getElementById('opt-cart-selector').value);
+          widgetDiv.setAttribute('data-brand-selector', brandSelVal);
+
+          // Update CSS custom properties on shadow host dynamically for visual-only styles
+          const host = widgetDiv.querySelector('[data-ssw-host]');
+          if (host) {
+            host.style.setProperty('--ssw-primary', color);
+            host.style.setProperty('--ssw-text-on-primary', textColor);
+            host.style.setProperty('--ssw-radius', radius + 'px');
+            host.style.setProperty('--ssw-font-size', fontSize + 'px');
+          }
+        }
+
+        // Preview butonu güncelle
+        const previewBtn = document.getElementById('preview-shoefit-btn');
+        if (previewBtn) {
+          previewBtn.style.background = color;
+          previewBtn.style.color = textColor;
+          previewBtn.style.borderRadius = radius + 'px';
+          previewBtn.style.fontSize = fontSize + 'px';
+          previewBtn.style.boxShadow = `0 4px 10px ${color}40`;
+        }
+
+        saveAllSettings();
+
+        if (onlyStyle) {
+          logEvent('Styles Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px' });
+          return;
+        }
+
+        if (window.reInitShoeSizeWidget) {
+          window.reInitShoeSizeWidget();
+          logEvent('Settings Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px', lang, brand, preset, targetSel, insertPos });
+        }
+      }
+
+      function changeProduct(val) {
+        const sel = document.getElementById('opt-product');
+        const opt = sel.options[sel.selectedIndex];
+        
+        document.getElementById('preview-title').textContent = opt.dataset.title;
+        document.getElementById('preview-img').src = opt.dataset.img;
+        
+        const previewBrandLabel = document.getElementById('preview-brand');
+        if (previewBrandLabel) {
+          previewBrandLabel.textContent = opt.dataset.brand;
+        }
+        
+        updateEmbedCode();
+        applySettings();
+      }
+
+
+
+      function logEvent(action, detail = {}) {
+        const logBox = document.getElementById('events-log');
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.textContent = `[${time}] ${action} ${JSON.stringify(detail)}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+
+      function logStoreSizeSelect(sz) {
+        logEvent('Store Size Radio Changed', { size: sz });
+      }
+
+      window.addEventListener('shoefit_widget_event', function(e) {
+        const detail = e.detail;
+        logEvent(`Widget Event: ${detail.event}`, detail);
+
+        if (detail.event === 'widget_opened') {
+          const starts = document.getElementById('kpi-starts');
+          starts.textContent = parseInt(starts.textContent) + 1;
+        } else if (detail.event === 'cta_clicked') {
+          const convs = document.getElementById('kpi-conversions');
+          convs.textContent = parseInt(convs.textContent) + 1;
+          
+          if (detail.autoSelected) {
+            const toast = document.getElementById('size-toast');
+            toast.textContent = `✓ Önerilen Beden (EU ${detail.recommendedSize}) Seçildi!`;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+          }
+        }
+      });
+
+      async function detectSelectorsFromUrl() {
+        const urlInput = document.getElementById('opt-url-detector');
+        const statusDiv = document.getElementById('detector-status');
+        let url = urlInput.value.trim();
+        if (!url) {
+          url = window.location.origin + window.location.pathname;
+          urlInput.value = url;
+        }
+
+        statusDiv.style.display = 'block';
+        statusDiv.style.color = '#38bdf8';
+        statusDiv.textContent = 'Sayfa analiz ediliyor...';
+
+        const lowercaseUrl = url.toLowerCase();
+        let detectedSize = '';
+        let detectedCart = '';
+        let matchReason = '';
+
+        if (lowercaseUrl.includes('localhost') || lowercaseUrl.includes('127.0.0.1')) {
+          detectedSize = '.size-option-label';
+          detectedCart = '.store-btn-cart';
+          matchReason = 'Demo Mağaza altyapısı algılandı.';
+        } else if (lowercaseUrl.includes('trendyol.com')) {
+          detectedSize = '.sp-itm-attr, .variant-selector-item';
+          detectedCart = '.add-to-basket';
+          matchReason = 'Trendyol altyapısı algılandı.';
+        } else if (lowercaseUrl.includes('hepsiburada.com')) {
+          detectedSize = '.variant-property-item, [class*="variant-property"]';
+          detectedCart = '#addToCart, .add-to-cart-button';
+          matchReason = 'Hepsiburada altyapısı algılandı.';
+        } else if (lowercaseUrl.includes('nike.com')) {
+          detectedSize = 'input[name="skuAndSize"], .size-grid-button';
+          detectedCart = '.add-to-cart-btn, [data-test="add-to-cart-button"]';
+          matchReason = 'Nike E-Ticaret altyapısı algılandı.';
+        } else if (lowercaseUrl.includes('adidas.com') || lowercaseUrl.includes('adidas.com.tr')) {
+          detectedSize = '.size-selector___3A92A button, [class*="size-selector"] button';
+          detectedCart = '[data-usn="add-to-bag-button"], button.add-to-bag';
+          matchReason = 'Adidas E-Ticaret altyapısı algılandı.';
+        } else if (lowercaseUrl.includes('/products/') || lowercaseUrl.includes('.myshopify.com')) {
+          detectedSize = 'select[name="id"], .product-form__input input[type="radio"]';
+          detectedCart = 'button[name="add"], .product-form__submit';
+          matchReason = 'Shopify E-Ticaret altyapısı algılandı.';
+        }
+
+        if (detectedSize && detectedCart) {
+          applyDetectedSelectors(detectedSize, detectedCart, matchReason);
+          return;
+        }
+
+        try {
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const response = await fetch(proxyUrl);
+          if (!response.ok) throw new Error('Proxy load failed');
+          const data = await response.json();
+          const html = data.contents;
+          
+          if (!html) throw new Error('Empty page content');
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          // Parse for size selector
+          const selects = doc.querySelectorAll('select');
+          for (const s of selects) {
+            const id = s.id ? `#${s.id}` : '';
+            const name = s.name ? `select[name="${s.name}"]` : '';
+            const className = s.className ? `.${s.className.split(' ').filter(c => c).join('.')}` : '';
+            const combined = s.className ? `select.${s.className.split(' ')[0]}` : '';
+            
+            const attributesText = (s.id + s.name + s.className).toLowerCase();
+            if (attributesText.includes('size') || attributesText.includes('beden') || attributesText.includes('numara')) {
+              detectedSize = id || name || combined || 'select';
+              break;
+            }
+          }
+
+          if (!detectedSize) {
+            const radios = doc.querySelectorAll('input[type="radio"]');
+            for (const r of radios) {
+              const nameAttr = r.name ? `input[name="${r.name}"]` : '';
+              const container = r.parentElement;
+              const attributesText = (r.name + r.id + (r.className || '')).toLowerCase();
+              if (attributesText.includes('size') || attributesText.includes('beden') || attributesText.includes('numara')) {
+                if (nameAttr) {
+                  detectedSize = nameAttr;
+                } else if (container && container.className) {
+                  detectedSize = `.${container.className.split(' ')[0]} input`;
+                } else {
+                  detectedSize = 'input[type="radio"]';
+                }
+                break;
+              }
+            }
+          }
+
+          if (!detectedSize) {
+            const containers = doc.querySelectorAll('[class*="size"], [id*="size"], [class*="beden"], [class*="numara"], [class*="swatch"]');
+            for (const container of containers) {
+              const classFirst = container.className ? `.${container.className.split(' ')[0]}` : '';
+              const idAttr = container.id ? `#${container.id}` : '';
+              const targetContainerSelector = idAttr || classFirst;
+              if (targetContainerSelector) {
+                const btn = container.querySelector('button, li, span');
+                if (btn) {
+                  detectedSize = `${targetContainerSelector} ${btn.tagName.toLowerCase()}`;
+                  break;
+                }
+              }
+            }
+          }
+
+          // Parse for cart selector
+          const buttons = doc.querySelectorAll('button, input[type="submit"], input[type="button"], a');
+          for (const btn of buttons) {
+            const text = (btn.textContent || btn.value || '').toLowerCase().trim();
+            const hasCartText = text.includes('sepete ekle') || text.includes('sepet') || text.includes('add to cart') || text.includes('add to bag') || text.includes('buy now') || text.includes('satın al');
+            
+            if (hasCartText) {
+              const id = btn.id ? `#${btn.id}` : '';
+              const name = btn.getAttribute('name') ? `button[name="${btn.getAttribute('name')}"]` : '';
+              const classFirst = btn.className ? `.${btn.className.split(' ').filter(c => c && !c.includes(':'))[0]}` : '';
+              detectedCart = id || name || `button${classFirst}` || 'button';
+              break;
+            }
+          }
+
+          if (detectedSize || detectedCart) {
+            detectedSize = detectedSize || '.size-option-label';
+            detectedCart = detectedCart || '.store-btn-cart';
+            applyDetectedSelectors(detectedSize, detectedCart, 'HTML tarama ve analiz başarılı.');
+          } else {
+            applyDetectedSelectors('.size-option-label', '.store-btn-cart', 'Eşleşen altyapı bulunamadı. Genel varsayılanlar atandı.');
+          }
+
+        } catch (err) {
+          console.warn('[Selector Detector] Fetch failed, using heuristical regex.', err);
+          applyDetectedSelectors('.size-option-label', '.store-btn-cart', 'CORS/Bağlantı hatası. Genel e-ticaret varsayılanları uygulandı.');
+        }
+      }
+
+      function applyDetectedSelectors(sizeSel, cartSel, reason) {
+        document.getElementById('opt-size-selector').value = sizeSel;
+        document.getElementById('opt-cart-selector').value = cartSel;
+        
+        const statusDiv = document.getElementById('detector-status');
+        statusDiv.style.color = '#10b981';
+        statusDiv.textContent = `✓ Başarılı: ${reason} (Beden: ${sizeSel}, Sepet: ${cartSel})`;
+        
+        updateEmbedCode();
+        applySettings();
+      }
+
+      function toggleAdvancedSettings() {
+        const panel = document.getElementById('advanced-settings-panel');
+        const arrow = document.getElementById('advanced-toggle-arrow');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+          panel.style.display = 'block';
+          arrow.textContent = '▲';
+        } else {
+          panel.style.display = 'none';
+          arrow.textContent = '▼';
+        }
+      }
+
+      function copyEmbedCode() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        if (!targetSel) {
+          alert('Lütfen önce "Buton Konumu" alanını doldurun.');
+          return;
+        }
+        const codeText = document.getElementById('embed-code-html').innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          alert('Kod panoya kopyalandı!');
+        });
+      }
+
+      function copyConsoleCode() {
+        const targetSel = document.getElementById('opt-target-selector').value.trim();
+        if (!targetSel) {
+          alert('Lütfen önce "Buton Konumu" alanını doldurun.');
+          return;
+        }
+        const codeText = document.getElementById('embed-code-console').innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          alert('Konsol kodu panoya kopyalandı!');
+        });
+      }
+
+      function scrollToSidebar() {
+        const sidebar = document.querySelector('.sidebar-column');
+        if (sidebar) {
+          sidebar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          sidebar.style.transform = 'scale(1.02)';
+          sidebar.style.transition = 'transform 0.3s ease';
+          setTimeout(() => {
+            sidebar.style.transform = 'none';
+          }, 600);
+        }
+      }
+
+      loadAllSettings();
+      updateRadiusLabel(document.getElementById('opt-radius').value);
+      updateFontSizeLabel(document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14');
+      validateAndUpdate();
+    </script>
+  </body>
+</html>

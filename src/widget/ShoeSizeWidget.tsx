@@ -14,9 +14,11 @@ interface ShoeSizeWidgetProps {
   stylePreset: string
   sizeSelector?: string
   cartSelector?: string
+  brandSelector?: string
   showAddToCart?: string
   showSelectSize?: string
   initialOpen?: boolean
+  initialStep?: number
 }
 
 interface SavedShoe {
@@ -71,7 +73,12 @@ const TRANSLATIONS = {
     successSelect: 'Beden seçildi ve sepete eklendi!',
     successSelectOnly: 'Beden seçildi!',
     successSave: 'Ayakkabı dolabınıza kaydedildi!',
-    resetBtn: 'Yeniden Hesapla'
+    resetBtn: 'Yeniden Hesapla',
+    targetBrandConfirmTitle: 'Hedef Markayı Doğrula',
+    targetBrandConfirmDesc: 'Beden hesaplaması yapılacak hedef ayakkabı markasını seçin:',
+    showResultBtn: 'Bedenimi Göster',
+    changeTargetBrand: 'Değiştir',
+    selectTargetBrandPlaceholder: 'Hedef marka ara/seç...'
   },
   en: {
     title: 'Size Assistant',
@@ -115,7 +122,12 @@ const TRANSLATIONS = {
     successSelect: 'Size selected and added to cart!',
     successSelectOnly: 'Size selected!',
     successSave: 'Shoe saved to cabinet!',
-    resetBtn: 'Recalculate'
+    resetBtn: 'Recalculate',
+    targetBrandConfirmTitle: 'Verify Target Brand',
+    targetBrandConfirmDesc: 'Select the target shoe brand for size calculation:',
+    showResultBtn: 'Show My Size',
+    changeTargetBrand: 'Change',
+    selectTargetBrandPlaceholder: 'Search/select target brand...'
   }
 }
 
@@ -151,6 +163,73 @@ function getBrandDomain(brand: string): string {
   return `${clean}.com`
 }
 
+function calculateSimilarity(s1: string, s2: string): number {
+  const m = s1.length
+  const n = s2.length
+  if (m === 0) return n === 0 ? 1 : 0
+  if (n === 0) return 0
+
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
+  for (let i = 0; i <= m; i++) dp[i][0] = i
+  for (let j = 0; j <= n; j++) dp[0][j] = j
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (s1[i - 1] === s2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1]
+      } else {
+        dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+      }
+    }
+  }
+
+  const distance = dp[m][n]
+  const maxLen = Math.max(m, n)
+  return 1 - distance / maxLen
+}
+
+function getBrandMatch(scrapedText: string, brands: string[]): string | null {
+  const cleanScraped = scrapedText.trim().toLowerCase()
+  if (!cleanScraped) return null
+
+  // 1. Direct word-level matching
+  const words = cleanScraped.split(/\s+/)
+  for (const brand of brands) {
+    const cleanBrand = brand.toLowerCase()
+    if (words.includes(cleanBrand) || cleanScraped.includes(cleanBrand)) {
+      return brand
+    }
+  }
+
+  // 2. Fuzzy similarity check
+  let bestMatch: string | null = null
+  let bestScore = 0
+
+  for (const brand of brands) {
+    const cleanBrand = brand.toLowerCase()
+    
+    const wholeScore = calculateSimilarity(cleanScraped, cleanBrand)
+    if (wholeScore > bestScore) {
+      bestScore = wholeScore
+      bestMatch = brand
+    }
+
+    for (const word of words) {
+      const wordScore = calculateSimilarity(word, cleanBrand)
+      if (wordScore > bestScore) {
+        bestScore = wordScore
+        bestMatch = brand
+      }
+    }
+  }
+
+  if (bestScore >= 0.70) {
+    return bestMatch
+  }
+
+  return null
+}
+
 export default function ShoeSizeWidget({
   storeId,
   productId,
@@ -161,6 +240,7 @@ export default function ShoeSizeWidget({
   stylePreset,
   sizeSelector,
   cartSelector,
+  brandSelector,
   showAddToCart = 'true',
   showSelectSize = 'true',
   initialStep = 1
@@ -168,6 +248,9 @@ export default function ShoeSizeWidget({
   const isDemo = storeId === 'STORE_DEMO'
   const [open, setOpen] = useState(isDemo)
   const [currentStep, setCurrentStep] = useState(initialStep)
+
+  const [resolvedTargetBrand, setResolvedTargetBrand] = useState(targetBrand)
+  const [targetBrandConfirmed, setTargetBrandConfirmed] = useState(false)
 
   // Sayfa başlığından ürün adını öğren: - veya | öncesi, ilk 4 kelime
   const pageTitle = useMemo(() => {
@@ -227,6 +310,31 @@ export default function ShoeSizeWidget({
   // Target elements detection
   const [showSelectSizeBtn, setShowSelectSizeBtn] = useState(true)
   const [showAddToCartBtn, setShowAddToCartBtn] = useState(true)
+
+  // CSS for button details
+  const ctaBehavior = showAddToCart === 'true' ? 'add_to_cart' : 'select_size'
+
+  // Resolve Target Brand using similarity check
+  useEffect(() => {
+    if (brandSelector && brandSelector.trim() !== '') {
+      try {
+        const el = document.querySelector(brandSelector)
+        if (el && el.textContent) {
+          const text = el.textContent
+          const matched = getBrandMatch(text, dynamicBrands)
+          if (matched) {
+            setResolvedTargetBrand(matched)
+            console.log(`[ShoeFit] Auto-detected brand "${matched}" via selector "${brandSelector}" (Scraped: "${text.trim()}")`)
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('[ShoeFit] Brand selector evaluation failed:', e)
+      }
+    }
+    // Fallback/Default
+    setResolvedTargetBrand(targetBrand)
+  }, [brandSelector, targetBrand, dynamicBrands])
 
   useEffect(() => {
     if (open) {
@@ -317,7 +425,7 @@ export default function ShoeSizeWidget({
   const recommendation = useMemo(() => {
     if (currentStep < 4) return null
     return recommendSize({
-      targetBrand,
+      targetBrand: resolvedTargetBrand,
       refBrand,
       refSize: refSizeValue,
       refSystem: refSizeSystem,
@@ -327,7 +435,7 @@ export default function ShoeSizeWidget({
     })
   }, [
     currentStep,
-    targetBrand,
+    resolvedTargetBrand,
     refBrand,
     refSizeValue,
     refSizeSystem,
@@ -336,6 +444,23 @@ export default function ShoeSizeWidget({
     isMeasuring,
     measuredCm
   ])
+
+  const dynamicSubtitle = useMemo(() => {
+    if (currentStep === 1) return t.subtitle
+
+    const parts: string[] = []
+    if (refBrand) parts.push(`🏷️ ${refBrand}`)
+    if (currentStep > 2) {
+      parts.push(`📏 ${isMeasuring ? `${measuredCm} cm` : `${refSizeValue} ${refSizeSystem}`}`)
+    }
+    if (currentStep > 3 && !isMeasuring && refFitFeedback) {
+      const fitLabel = refFitFeedback === 'kucuk' ? t.fitTight : refFitFeedback === 'tam' ? t.fitPerfect : t.fitLoose
+      parts.push(`✨ ${fitLabel}`)
+    }
+
+    if (parts.length === 0) return t.subtitle
+    return `${lang === 'tr' ? 'Seçimleriniz' : 'Selections'}: ${parts.join(' • ')}`
+  }, [currentStep, refBrand, refSizeValue, refSizeSystem, isMeasuring, measuredCm, refFitFeedback, lang, t])
 
   const dispatchEvent = (eventName: string, payload: any = {}) => {
     console.log(`[ShoeFit Event] ${eventName}`, payload)
@@ -484,6 +609,7 @@ export default function ShoeSizeWidget({
     setBrandSearch('')
     setIsMeasuring(false)
     setMeasuredCm(undefined)
+    setTargetBrandConfirmed(false)
   }
 
   const showCloseBtn = !showSelectSizeBtn && !showAddToCartBtn
@@ -523,7 +649,7 @@ export default function ShoeSizeWidget({
           dispatchEvent('widget_closed')
         }}
         title={t.title}
-        subtitle={t.subtitle}
+        subtitle={dynamicSubtitle}
         stylePreset={stylePreset}
       >
         {/* Stepper Header */}
@@ -827,106 +953,188 @@ export default function ShoeSizeWidget({
         )}
 
         {/* STEP 4: Results Display */}
-        {currentStep === 4 && recommendation && (
+        {currentStep === 4 && (
           <div className="ssw-fade-in">
-            <div className="result-card">
-              <div className="ssw-result-grid">
-                <div className="ssw-result-row">
-                  <div>
-                    <p className="ssw-result-label">{t.recommendedTitle}</p>
-                    <p className="ssw-result-value">EU {recommendation.recommendedSizeEu}</p>
-                  </div>
+            {!targetBrandConfirmed ? (
+              <div className="ssw-target-confirm-container ssw-fade-in" style={{ marginTop: '8px' }}>
+                <div className="ssw-card ssw-card-brand-list">
+                  <label className="ssw-label">🎯 {t.targetBrandConfirmTitle}</label>
+                  <p className="ssw-section-note">{t.targetBrandConfirmDesc}</p>
                   
-                  <div className="ssw-result-confidence">
-                    <p className="ssw-result-label">{t.confidenceScore}</p>
-                    <div className="ssw-badge-confidence" data-risk={recommendation.riskLevel}>
-                      {recommendation.confidenceScore}%
+                  <input
+                    className="ssw-input"
+                    type="text"
+                    placeholder={t.selectTargetBrandPlaceholder}
+                    value={brandSearch}
+                    onChange={e => setBrandSearch(e.target.value)}
+                  />
+
+                  <div className="ssw-brand-list" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                    {filteredBrands.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '24px 12px', color: '#64748b', fontSize: '0.85rem' }}>
+                        {lang === 'tr' ? 'Aradığınız marka bulunamadı.' : 'No matching brands found.'}
+                      </div>
+                    ) : (
+                      filteredBrands.map(brand => {
+                        const domain = getBrandDomain(brand)
+                        const errorKey = `${brand}_list_logo_target`
+                        const hasError = cabinetImgErrors[errorKey]
+                        const logoSrc = hasError 
+                          ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+                          : `https://logo.clearbit.com/${domain}`
+
+                        const isSelected = resolvedTargetBrand === brand
+                        const meta = (brandMeta as any)[brand]
+                        
+                        return (
+                          <button
+                            key={brand}
+                            type="button"
+                            className={`ssw-brand-row-item ${isSelected ? 'active' : ''}`}
+                            onClick={() => {
+                              setResolvedTargetBrand(brand)
+                              setTargetBrandConfirmed(true)
+                              dispatchEvent('target_brand_confirmed', { targetBrand: brand })
+                            }}
+                          >
+                            <img
+                              className="ssw-brand-row-logo"
+                              src={logoSrc}
+                              alt={brand}
+                              onError={() => {
+                                setCabinetImgErrors(prev => ({ ...prev, [errorKey]: true }))
+                              }}
+                            />
+                            <div className="ssw-brand-row-info">
+                              <strong>{brand}</strong>
+                              <small>{lang === 'tr' ? (meta?.caption || 'Standard kalıp') : 'Size reference brand'}</small>
+                            </div>
+                            <span className="ssw-brand-row-arrow">→</span>
+                          </button>
+                        )
+                      })
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              recommendation && (
+                <div className="ssw-fade-in">
+                  {/* Header showing confirmed brand and a Change button */}
+                  <div className="ssw-confirmed-brand-header">
+                    <span className="ssw-confirmed-label">
+                      {lang === 'tr' ? 'Hedef Marka:' : 'Target Brand:'} <strong>{resolvedTargetBrand}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      className="ssw-change-brand-btn"
+                      onClick={() => setTargetBrandConfirmed(false)}
+                    >
+                      ✏️ {t.changeTargetBrand}
+                    </button>
+                  </div>
+
+                  <div className="result-card" style={{ marginTop: '10px' }}>
+                    <div className="ssw-result-grid">
+                      <div className="ssw-result-row">
+                        <div>
+                          <p className="ssw-result-label">{t.recommendedTitle}</p>
+                          <p className="ssw-result-value">EU {recommendation.recommendedSizeEu}</p>
+                        </div>
+                        
+                        <div className="ssw-result-confidence">
+                          <p className="ssw-result-label">{t.confidenceScore}</p>
+                          <div className="ssw-badge-confidence" data-risk={recommendation.riskLevel}>
+                            {recommendation.confidenceScore}%
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="ssw-result-row" style={{ borderTop: '1px solid rgba(15,23,42,0.06)', paddingTop: '10px' }}>
+                        <span className="ssw-result-label">{t.alternativeTitle}:</span>
+                        <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>
+                          EU {recommendation.alternativeSizeEu}
+                        </strong>
+                      </div>
+
+                      <div className="ssw-result-help">
+                        {lang === 'tr' ? recommendation.explanationTr : recommendation.explanationEn}
+                      </div>
+
+                      {((lang === 'tr' ? recommendation.warningsTr : recommendation.warningsEn).length > 0) && (
+                        <div className="ssw-warnings-container">
+                          <span className="ssw-result-label">{t.warnings}:</span>
+                          <ul className="ssw-warnings-list">
+                            {(lang === 'tr' ? recommendation.warningsTr : recommendation.warningsEn).map((warn, i) => (
+                              <li key={i}>{warn}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                <div className="ssw-result-row" style={{ borderTop: '1px solid rgba(15,23,42,0.06)', paddingTop: '10px' }}>
-                  <span className="ssw-result-label">{t.alternativeTitle}:</span>
-                  <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>
-                    EU {recommendation.alternativeSizeEu}
-                  </strong>
-                </div>
+                  {successMsg && <div className="ssw-toast ssw-fade-in">{successMsg}</div>}
 
-                <div className="ssw-result-help">
-                  {lang === 'tr' ? recommendation.explanationTr : recommendation.explanationEn}
-                </div>
+                  <div className="ssw-results-footer" style={{ marginTop: '20px' }}>
+                    {showAddToCartBtn && (
+                      <button
+                        type="button"
+                        className="ssw-button ssw-button-full"
+                        onClick={handleSelectSize}
+                      >
+                        {t.selectSizeBtn}
+                      </button>
+                    )}
 
-                {((lang === 'tr' ? recommendation.warningsTr : recommendation.warningsEn).length > 0) && (
-                  <div className="ssw-warnings-container">
-                    <span className="ssw-result-label">{t.warnings}:</span>
-                    <ul className="ssw-warnings-list">
-                      {(lang === 'tr' ? recommendation.warningsTr : recommendation.warningsEn).map((warn, i) => (
-                        <li key={i}>{warn}</li>
-                      ))}
-                    </ul>
+                    {showSelectSizeBtn && (
+                      <button
+                        type="button"
+                        className="ssw-button ssw-button-full"
+                        style={{ marginTop: showAddToCartBtn ? '10px' : '0px', backgroundColor: '#334155', color: '#fff', border: 'none' }}
+                        onClick={handleSelectSizeOnly}
+                      >
+                        {t.selectOnlySizeBtn}
+                      </button>
+                    )}
+
+                    {showCloseBtn && (
+                      <button
+                        type="button"
+                        className="ssw-button ssw-button-full"
+                        onClick={handleCloseDrawer}
+                      >
+                        {t.close}
+                      </button>
+                    )}
+                    
+                    <button
+                      type="button"
+                      className="ssw-secondary ssw-button-full"
+                      style={{ marginTop: '10px' }}
+                      onClick={handleSaveToCabinet}
+                    >
+                      {t.saveShoesBtn}
+                    </button>
+
+                    <p className="ssw-cabinet-info-text">
+                      {lang === 'tr'
+                        ? '* Beden tercihiniz ve ayak yapınız tarayıcınıza kaydedilir. Diğer ürünlerde doğrudan öneri almak için kullanılır.'
+                        : '* Saves your size/fit preferences in this browser to instantly recommend sizes on other product pages.'}
+                    </p>
+
+                    <button
+                      type="button"
+                      className="ssw-text-btn ssw-button-full"
+                      style={{ marginTop: '10px' }}
+                      onClick={handleReset}
+                    >
+                      {t.resetBtn}
+                    </button>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {successMsg && <div className="ssw-toast ssw-fade-in">{successMsg}</div>}
-
-            <div className="ssw-results-footer" style={{ marginTop: '20px' }}>
-              {showAddToCartBtn && (
-                <button
-                  type="button"
-                  className="ssw-button ssw-button-full"
-                  onClick={handleSelectSize}
-                >
-                  {t.selectSizeBtn}
-                </button>
-              )}
-
-              {showSelectSizeBtn && (
-                <button
-                  type="button"
-                  className="ssw-button ssw-button-full"
-                  style={{ marginTop: showAddToCartBtn ? '10px' : '0px', backgroundColor: '#334155', color: '#fff', border: 'none' }}
-                  onClick={handleSelectSizeOnly}
-                >
-                  {t.selectOnlySizeBtn}
-                </button>
-              )}
-
-              {showCloseBtn && (
-                <button
-                  type="button"
-                  className="ssw-button ssw-button-full"
-                  onClick={handleCloseDrawer}
-                >
-                  {t.close}
-                </button>
-              )}
-              
-              <button
-                type="button"
-                className="ssw-secondary ssw-button-full"
-                style={{ marginTop: '10px' }}
-                onClick={handleSaveToCabinet}
-              >
-                {t.saveShoesBtn}
-              </button>
-
-              <p className="ssw-cabinet-info-text">
-                {lang === 'tr'
-                  ? '* Beden tercihiniz ve ayak yapınız tarayıcınıza kaydedilir. Diğer ürünlerde doğrudan öneri almak için kullanılır.'
-                  : '* Saves your size/fit preferences in this browser to instantly recommend sizes on other product pages.'}
-              </p>
-
-              <button
-                type="button"
-                className="ssw-text-btn ssw-button-full"
-                style={{ marginTop: '10px' }}
-                onClick={handleReset}
-              >
-                {t.resetBtn}
-              </button>
-            </div>
+                </div>
+              )
+            )}
           </div>
         )}
       </Drawer>

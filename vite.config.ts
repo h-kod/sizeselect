@@ -37,6 +37,21 @@ export default defineConfig({
       closeBundle() {
         copyDir('public', 'dist')
       }
+    },
+    {
+      name: 'html-routing',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const url = req.url || '';
+          const path = url.split('?')[0];
+          if (path === '/' || path === '/tr' || path === '/en' || path.startsWith('/tr/') || path.startsWith('/en/')) {
+            req.url = '/index.html';
+          } else if (path === '/dashboard') {
+            req.url = '/dashboard.html';
+          }
+          next();
+        });
+      }
     }
   ]
 })

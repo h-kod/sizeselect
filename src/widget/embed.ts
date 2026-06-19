@@ -20,6 +20,7 @@ interface WidgetConfig {
   stylePreset: string
   sizeSelector: string
   cartSelector: string
+  brandSelector: string
   showAddToCart: string
   showSelectSize: string
   targetSelector: string
@@ -88,6 +89,7 @@ function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, op
       stylePreset: config.stylePreset || 'modern',
       sizeSelector: config.sizeSelector || '',
       cartSelector: config.cartSelector || '',
+      brandSelector: config.brandSelector || '',
       showAddToCart: config.showAddToCart || 'true',
       showSelectSize: config.showSelectSize || 'true',
       initialOpen: openOnMount,
@@ -169,12 +171,12 @@ function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<Widget
   const targetSelector = forceConfig?.targetSelector || divContainer?.getAttribute('data-target-selector') || scriptDataset.targetSelector || ''
   const insertPosition = forceConfig?.insertPosition || divContainer?.getAttribute('data-insert-position') || scriptDataset.insertPosition || 'after'
 
-  const target = findInsertTarget(targetSelector)
+  const storeId = forceConfig?.storeId || divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
+  const target = (storeId === 'STORE_DEMO') ? (document.getElementById('shoefit-widget') || document.body) : findInsertTarget(targetSelector)
   if (!target) return
   currentTarget = target
 
   // Preference order: 1. forceConfig, 2. Div container attributes, 3. Script attributes, 4. Defaults
-  const storeId = forceConfig?.storeId || divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
   const productId = forceConfig?.productId || divContainer?.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
   const brand = forceConfig?.brand || divContainer?.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
   const model = forceConfig?.model || divContainer?.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
@@ -187,6 +189,7 @@ function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<Widget
   const stylePreset = forceConfig?.stylePreset || divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
   const sizeSelector = forceConfig?.sizeSelector || divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
   const cartSelector = forceConfig?.cartSelector || divContainer?.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
+  const brandSelector = forceConfig?.brandSelector || divContainer?.getAttribute('data-brand-selector') || scriptDataset.brandSelector || ''
   const showAddToCart = forceConfig?.showAddToCart || divContainer?.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
   const showSelectSize = forceConfig?.showSelectSize || divContainer?.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
 
@@ -204,6 +207,7 @@ function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<Widget
     stylePreset,
     sizeSelector,
     cartSelector,
+    brandSelector,
     showAddToCart,
     showSelectSize,
     targetSelector,

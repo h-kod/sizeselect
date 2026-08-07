@@ -1,21 +1,23 @@
 {
   "name": "shoe-size-widget",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "preact": "^10.19.3"
   },
   "devDependencies": {
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "jsdom": "^23.2.0",
     "typescript": "5.1.6",
     "vite": "5.0.0",
     "vitest": "^1.0.0"

@@ -5,20 +5,14 @@
 [dev]
   command = "npm run dev"
 
+# Widget üçüncü taraf sitelerden yüklendiği için CORS açık olmalı.
 [[headers]]
   for = "/shoe-size-widget.js"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, OPTIONS"
-    Access-Control-Allow-Headers = "*"
     Content-Type = "application/javascript; charset=utf-8"
-
-[[headers]]
-  for = "/shoe-size-widget.umd.cjs"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, OPTIONS"
-    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 [[redirects]]
   from = "/tr"
@@ -45,3 +39,7 @@
   to = "/dashboard.html"
   status = 200
 
+[[redirects]]
+  from = "/panel"
+  to = "/dashboard.html"
+  status = 200

@@ -1,1936 +1,2048 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ShoeFit · Merchant Panel & Demo Store</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-      :root {
-        --primary-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-        --accent-color: #06b6d4;
-        --bg-dark: #050814;
-        --panel-bg: rgba(13, 20, 38, 0.85);
-        --input-bg: rgba(21, 32, 59, 0.7);
-        --border-color: rgba(6, 182, 212, 0.18);
-        --text-main: #f8fafc;
-        --text-muted: #94a3b8;
-        --card-light-bg: #1e293b;
-      }
-      
-      /* Sub-tabs inside Widget Customizer */
-      .sub-tabs {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 20px;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 4px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-      }
-      .sub-tab {
-        flex: 1;
-        padding: 8px 12px;
-        border: none;
-        background: transparent;
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        cursor: pointer;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        text-align: center;
-        white-space: nowrap;
-      }
-      .sub-tab:hover {
-        color: var(--text-main);
-        background: rgba(255, 255, 255, 0.03);
-      }
-      .sub-tab.active {
-        background: var(--primary-gradient);
-        color: white;
-        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
-      }
-      .sub-tab-content {
-        display: none;
-      }
-      .sub-tab-content.active {
-        display: block;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>ShoeFit · Mağaza Paneli</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👟</text></svg>" />
+  <style>
+    /* ===================================================================
+       Panel tasarım sistemi — açık, yoğun bilgi taşıyan "workspace" düzeni
+       =================================================================== */
 
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: var(--bg-dark);
-        background-image: 
-          radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
-          radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
-        background-attachment: fixed;
-        color: var(--text-main);
-        min-height: 100vh;
-      }
-      header {
-        background: rgba(13, 20, 38, 0.9);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--border-color);
-        padding: 16px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      }
-      .logo {
-        font-family: 'Outfit', sans-serif;
-        font-weight: 800;
-        font-size: 1.5rem;
-        background: linear-gradient(90deg, #10b981, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        letter-spacing: -0.02em;
-      }
-      .logo-icon {
-        background: var(--primary-gradient);
-        color: white;
-        font-size: 1rem;
-        padding: 4px 8px;
-        border-radius: 6px;
-        -webkit-text-fill-color: white;
-      }
-      .header-badge {
-        background: rgba(6, 182, 212, 0.15);
-        color: #22d3ee;
-        font-size: 0.75rem;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(6, 182, 212, 0.3);
-      }
-      main {
-        max-width: 1600px;
-        margin: 0 auto;
-        padding: 32px 24px;
-        display: grid;
-        grid-template-columns: 1.2fr 0.9fr 380px;
-        gap: 24px;
-        align-items: start;
-      }
-      /* Dashboard panel cards */
-      .panel-card {
-        background: var(--panel-bg);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid var(--border-color);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .panel-tabs {
-        display: flex;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 5px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        gap: 6px;
-        margin-bottom: 12px;
-        overflow-x: auto;
-      }
-      .panel-tab {
-        padding: 10px 16px;
-        border: none;
-        background: transparent;
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        cursor: pointer;
-        border-radius: 8px;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        white-space: nowrap;
-      }
-      .panel-tab:hover {
-        color: var(--text-main);
-        background: rgba(255, 255, 255, 0.03);
-      }
-      .panel-tab.active {
-        color: white;
-        background: var(--primary-gradient);
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-      }
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: block;
-      }
-      /* Form Customizer styling */
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .form-group label {
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: #cbd5e1;
-      }
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-      .form-control {
-        width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        padding: 11px;
-        font-size: 0.9rem;
-        outline: none;
-        background-color: var(--input-bg);
-        color: var(--text-main);
-        transition: all 0.15s ease;
-      }
-      .form-control:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-      }
-      .code-snippet-box {
-        background: #06070d;
-        border-radius: 12px;
-        padding: 16px;
-        color: #f8fafc;
-        overflow-x: auto;
-        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        position: relative;
-        margin-top: 10px;
-        border: 1px solid var(--border-color);
-      }
-      .copy-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: 500;
-        transition: background 0.15s ease;
-      }
-      .copy-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
-      }
-      .btn-apply {
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 14px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
-        transition: all 0.2s ease;
-      }
-      .btn-apply:hover {
-        filter: brightness(1.08);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.3);
-      }
+    :root {
+      --ink: #10151f;
+      --ink-2: #3d4757;
+      --ink-3: #6b7688;
+      --line: #e3e7ee;
+      --line-2: #eef1f6;
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --brand: #1d4ed8;
+      --brand-soft: #eef3ff;
+      --ok: #047857;
+      --ok-soft: #e7f6f0;
+      --warn: #b45309;
+      --warn-soft: #fdf3e3;
+      --err: #b91c1c;
+      --err-soft: #fdeceb;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(16, 21, 31, .05), 0 8px 24px -16px rgba(16, 21, 31, .3);
+      --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --nav-w: 216px;
+    }
 
-      /* Analytics KPIs */
-      .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-      .kpi-card {
-        background: var(--bg-dark);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 16px;
-      }
-      .kpi-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-      }
-      .kpi-value {
-        font-size: 1.4rem;
-        font-weight: 800;
-        margin: 6px 0 2px;
-        color: var(--text-main);
-      }
-      .kpi-sub {
-        font-size: 0.74rem;
-        color: #10b981;
-        font-weight: 600;
-      }
-      .chart-box {
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 18px;
-        margin-bottom: 18px;
-        background: var(--bg-dark);
-      }
-      .chart-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        margin: 0 0 12px;
-        color: #cbd5e1;
-      }
-      .bar-row {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-bottom: 8px;
-      }
-      .bar-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.82rem;
-        color: #94a3b8;
-      }
-      .bar-outer {
-        background: #334155;
-        height: 6px;
-        border-radius: 99px;
-        overflow: hidden;
-      }
-      .bar-inner {
-        background: #3b82f6;
-        height: 100%;
-        border-radius: 99px;
-      }
-      .events-log {
-        background: #090d16;
-        color: #38bdf8;
-        padding: 16px;
-        border-radius: 10px;
-        font-family: monospace;
-        font-size: 0.8rem;
-        height: 150px;
-        overflow-y: auto;
-        border: 1px solid var(--border-color);
-      }
-      .events-log div {
-        margin-bottom: 4px;
-      }
+    * { box-sizing: border-box; }
 
-      /* UI Preset styling cards */
-      .preset-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 6px;
-      }
-      @media (max-width: 960px) {
-        .preset-cards-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-      @media (max-width: 640px) {
-        .preset-cards-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-      .preset-card {
-        background: var(--input-bg);
-        border: 2px solid #475569;
-        border-radius: 12px;
-        padding: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        user-select: none;
-      }
-      .preset-card:hover {
-        border-color: #64748b;
-        transform: translateY(-2px);
-        background: rgba(255,255,255,0.03);
-      }
-      .preset-card.active {
-        border-color: var(--accent-color);
-        background: rgba(59, 130, 246, 0.1);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      }
-      .preset-icon {
-        font-size: 1.35rem;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .preset-card.active .preset-icon {
-        background: rgba(59, 130, 246, 0.2);
-      }
-      .preset-info {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-      }
-      .preset-title {
-        font-weight: 700;
-        font-size: 0.85rem;
-        color: var(--text-main);
-      }
-      .preset-desc {
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        line-height: 1.25;
-      }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
 
-      /* Toggle button group customizers */
-      .btn-group-toggle {
-        display: flex;
-        gap: 6px;
-        background: rgba(0, 0, 0, 0.2);
-        padding: 4px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-      }
-      .btn-toggle {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        padding: 8px 12px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        border-radius: 8px;
-        transition: all 0.15s ease;
-        text-align: center;
-        white-space: nowrap;
-      }
-      .btn-toggle:hover {
-        color: var(--text-main);
-        background: rgba(255, 255, 255, 0.03);
-      }
-      .btn-toggle.active {
-        background: var(--accent-color);
-        color: white;
-        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-      }
+    h1, h2, h3, h4, p, ul, ol { margin: 0; }
+    ul, ol { padding: 0; list-style: none; }
+    a { color: var(--brand); }
 
-      /* Store mock preview layout */
-      .mock-store-card {
-        background: var(--panel-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-        padding: 24px;
-        position: sticky;
-        top: 100px;
-        color: var(--text-main);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-      }
-      .store-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(16, 185, 129, 0.15);
-        color: #34d399;
-        font-size: 0.7rem;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 999px;
-        margin-bottom: 12px;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      .product-title {
-        font-family: 'Inter', sans-serif;
-        font-size: 1.25rem;
-        font-weight: 800;
-        margin: 0 0 6px;
-        color: var(--text-main);
-        letter-spacing: -0.02em;
-      }
-      .product-price {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #10b981;
-        margin-bottom: 14px;
-      }
-      .product-img-container {
-        width: 100%;
-        background: #f8fafc;
-        border-radius: 16px;
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        margin-bottom: 14px;
-        box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease;
-      }
-      .product-img-container:hover {
-        transform: scale(1.02);
-      }
-      .product-img {
-        max-width: 100%;
-        max-height: 140px;
-        object-fit: contain;
-        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
-      }
-      /* E-commerce Store Size Selector */
-      .size-selector-label {
-        font-weight: 700;
-        font-size: 0.8rem;
-        margin-bottom: 10px;
-        display: block;
-        color: #cbd5e1;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      .size-options {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .size-option-item {
-        position: relative;
-      }
-      .size-option-item input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .size-option-label {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 10px;
-        padding: 10px 4px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--text-muted);
-        background: rgba(255, 255, 255, 0.02);
-      }
-      .size-option-label:hover {
-        border-color: rgba(99, 102, 241, 0.4);
-        color: var(--text-main);
-        background: rgba(255,255,255,0.05);
-      }
-      .size-option-item input:checked + .size-option-label {
-        border-color: var(--accent-color);
-        background: rgba(99, 102, 241, 0.15);
-        color: #818cf8;
-        box-shadow: 0 0 12px rgba(99,102,241,0.25);
-      }
-      .size-success-toast {
-        background: rgba(16, 185, 129, 0.15);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #34d399;
-        font-weight: 700;
-        font-size: 0.75rem;
-        text-align: center;
-        padding: 6px 12px;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        display: none;
-      }
-      .store-btn-cart {
-        background: var(--text-main);
-        color: var(--bg-dark);
-        border: none;
-        border-radius: 12px;
-        width: 100%;
-        padding: 12px;
-        font-weight: 800;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-top: 8px;
-      }
-      .store-btn-cart:hover {
-        background: #e2e8f0;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255,255,255,0.1);
-      }
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
 
-      /* Database table design */
-      .db-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
-        margin-top: 10px;
-        color: #cbd5e1;
+    :focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ---------------- Yerleşim ---------------- */
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--nav-w) 1fr;
+      min-height: 100vh;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 18px 12px;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 8px;
+    }
+
+    .brand__mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .brand__name {
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .brand__ver {
+      font-size: 11px;
+      color: var(--ink-3);
+      font-family: var(--mono);
+    }
+
+    .nav__group { display: flex; flex-direction: column; gap: 2px; }
+
+    .nav__label {
+      padding: 0 8px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .nav__item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 8px 9px;
+      border: none;
+      border-radius: 8px;
+      background: none;
+      text-align: left;
+      font-size: 13.5px;
+      font-weight: 550;
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: background .12s, color .12s;
+    }
+
+    .nav__item:hover { background: var(--line-2); color: var(--ink); }
+
+    .nav__item.is-active {
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 650;
+    }
+
+    .nav__item svg {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      fill: none; stroke: currentColor;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .nav__foot { margin-top: auto; padding: 0 8px; font-size: 11.5px; color: var(--ink-3); }
+
+    .main { min-width: 0; display: flex; flex-direction: column; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 13px 24px;
+      background: rgba(247, 248, 250, .88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar__title { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+    .topbar__sub { font-size: 12px; color: var(--ink-3); }
+    .topbar__actions { display: flex; align-items: center; gap: 8px; }
+
+    .content { padding: 22px 24px 60px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 384px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .layout--wide { grid-template-columns: minmax(0, 1fr); }
+
+    .preview-col { position: sticky; top: 74px; }
+
+    /* ---------------- Kart ---------------- */
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card + .card { margin-top: 16px; }
+
+    .card__head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line-2);
+    }
+
+    .card__title { font-size: 14px; font-weight: 650; letter-spacing: -.01em; }
+    .card__desc { margin-top: 2px; font-size: 12.5px; color: var(--ink-3); line-height: 1.45; }
+    .card__body { padding: 16px; }
+    .card__body--flush { padding: 0; }
+
+    /* ---------------- Form ---------------- */
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field + .field { margin-top: 14px; }
+    .field__label { font-size: 12.5px; font-weight: 600; }
+    .field__hint { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+    .input, .select {
+      width: 100%;
+      height: 38px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      transition: border-color .12s, box-shadow .12s;
+    }
+
+    .input:focus, .select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+
+    .input--mono { font-family: var(--mono); font-size: 12.5px; }
+    .input.is-error { border-color: var(--err); }
+
+    .input[type="color"] { padding: 3px; cursor: pointer; }
+    .input[type="range"] { height: 32px; padding: 0; border: none; background: none; accent-color: var(--brand); }
+
+    .row-inline { display: flex; align-items: center; gap: 10px; }
+    .row-inline > .input { flex: 1; }
+
+    .value-badge {
+      min-width: 46px; text-align: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-3);
+    }
+
+    /* ---------------- Buton ---------------- */
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 36px; padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: background .12s, border-color .12s, color .12s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { border-color: #c9d1de; background: #fbfcfd; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn--primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .btn--primary:hover { background: #1a45bd; border-color: #1a45bd; }
+    .btn--sm { height: 30px; padding: 0 10px; font-size: 12px; }
+    .btn--block { width: 100%; }
+    .btn--ghost { border-color: transparent; background: none; color: var(--ink-3); }
+    .btn--ghost:hover { background: var(--line-2); color: var(--ink); }
+
+    .btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ---------------- Seçim kartları ---------------- */
+
+    .picker { display: grid; gap: 8px; }
+    .picker--3 { grid-template-columns: repeat(3, 1fr); }
+
+    .pick {
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .12s, background .12s;
+    }
+
+    .pick:hover { border-color: #c9d1de; }
+    .pick.is-active { border-color: var(--brand); background: var(--brand-soft); }
+    .pick__name { font-size: 13px; font-weight: 650; }
+    .pick__meta { font-size: 11.5px; color: var(--ink-3); }
+
+    /* Tema önizleme kartları */
+    .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+    .theme {
+      padding: 0; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 9px;
+      background: var(--surface); cursor: pointer;
+      transition: border-color .12s, transform .12s;
+    }
+
+    .theme:hover { transform: translateY(-1px); }
+    .theme.is-active { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+
+    .theme__swatch { height: 44px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .theme__chip { width: 22px; height: 9px; border-radius: 3px; }
+    .theme__name { display: block; padding: 6px; font-size: 11.5px; font-weight: 600; border-top: 1px solid var(--line-2); }
+
+    /* ---------------- Segment ---------------- */
+
+    .segment {
+      display: inline-flex; padding: 3px; gap: 2px;
+      border: 1px solid var(--line); border-radius: 9px; background: var(--line-2);
+    }
+
+    .segment button {
+      height: 30px; padding: 0 12px;
+      border: none; border-radius: 7px; background: none;
+      font-size: 12.5px; font-weight: 600; color: var(--ink-3); cursor: pointer;
+    }
+
+    .segment button.is-active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+    /* ---------------- Kod bloğu ---------------- */
+
+    .code {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #0f1420;
+      overflow: hidden;
+    }
+
+    .code__bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px 7px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 11.5px; color: #94a3b8; font-family: var(--mono);
+    }
+
+    .code__copy {
+      height: 26px; padding: 0 9px;
+      border: 1px solid rgba(255,255,255,.14); border-radius: 6px;
+      background: rgba(255,255,255,.06); color: #e2e8f0;
+      font-size: 11.5px; font-weight: 600; cursor: pointer;
+    }
+
+    .code__copy:hover { background: rgba(255,255,255,.12); }
+
+    .code pre {
+      margin: 0; padding: 12px;
+      overflow-x: auto;
+      font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #e2e8f0;
+      white-space: pre;
+    }
+
+    .code .tk-attr { color: #7dd3fc; }
+    .code .tk-str { color: #86efac; }
+    .code .tk-tag { color: #c4b5fd; }
+    .code .tk-cmt { color: #64748b; font-style: italic; }
+
+    /* ---------------- Bildirim / rozet ---------------- */
+
+    .note {
+      display: flex; gap: 9px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      font-size: 12.5px; line-height: 1.5;
+      background: var(--line-2);
+    }
+
+    .note--info { background: var(--brand-soft); border-color: #cfdcff; color: #1e3a8a; }
+    .note--ok { background: var(--ok-soft); border-color: #bfe6d7; color: #065f46; }
+    .note--warn { background: var(--warn-soft); border-color: #f2ddb9; color: #92400e; }
+    .note__icon { flex-shrink: 0; font-size: 14px; line-height: 1.35; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 650;
+      background: var(--line-2); color: var(--ink-3);
+    }
+
+    .badge--ok { background: var(--ok-soft); color: var(--ok); }
+    .badge--warn { background: var(--warn-soft); color: var(--warn); }
+    .badge--err { background: var(--err-soft); color: var(--err); }
+    .badge--brand { background: var(--brand-soft); color: var(--brand); }
+
+    .dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+
+    /* ---------------- Tablo ---------------- */
+
+    .table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .table th, .table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line-2); }
+    .table th {
+      font-size: 11px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase;
+      color: var(--ink-3); background: #fafbfc; position: sticky; top: 0;
+    }
+    .table tbody tr:hover { background: #fafbfc; }
+    .table td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .table-wrap { max-height: 460px; overflow: auto; }
+
+    /* ---------------- İstatistik ---------------- */
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    .stat { padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .stat__label { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+    .stat__value { margin-top: 4px; font-size: 24px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+    .stat__meta { margin-top: 2px; font-size: 11.5px; color: var(--ink-3); }
+
+    .bars { display: flex; flex-direction: column; gap: 10px; }
+    .bar__top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
+    .bar__track { height: 7px; border-radius: 999px; background: var(--line-2); overflow: hidden; }
+    .bar__fill { height: 100%; border-radius: 999px; background: var(--brand); transition: width .4s ease; }
+    .bar__fill--ok { background: var(--ok); }
+    .bar__fill--warn { background: var(--warn); }
+    .bar__fill--err { background: var(--err); }
+
+    .empty {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 40px 20px; text-align: center; color: var(--ink-3); font-size: 13px;
+    }
+    .empty__icon { font-size: 26px; opacity: .5; }
+
+    /* ---------------- Olay günlüğü ---------------- */
+
+    .log { max-height: 260px; overflow-y: auto; font-family: var(--mono); font-size: 11.5px; }
+    .log__row { display: flex; gap: 10px; padding: 6px 12px; border-bottom: 1px solid var(--line-2); }
+    .log__time { color: var(--ink-3); flex-shrink: 0; }
+    .log__event { color: var(--brand); font-weight: 600; flex-shrink: 0; }
+    .log__data { color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ---------------- Demo mağaza ---------------- */
+
+    .shop {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface); overflow: hidden; box-shadow: var(--shadow);
+    }
+
+    .shop__chrome {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-bottom: 1px solid var(--line-2); background: #fafbfc;
+    }
+
+    .shop__lights { display: flex; gap: 5px; }
+    .shop__lights span { width: 8px; height: 8px; border-radius: 999px; background: #d7dde6; }
+    .shop__url {
+      flex: 1; padding: 3px 10px; border-radius: 6px; background: var(--surface);
+      border: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .shop__body { padding: 16px; }
+    .shop__eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+    .shop__title { margin-top: 3px; font-size: 16px; font-weight: 680; letter-spacing: -.02em; }
+    .shop__price { margin-top: 4px; font-size: 15px; font-weight: 650; }
+
+    .shop__media {
+      margin: 12px 0;
+      aspect-ratio: 16 / 9;
+      border-radius: 9px;
+      background: var(--line-2);
+      display: grid; place-items: center; overflow: hidden;
+    }
+    .shop__media img { width: 100%; height: 100%; object-fit: contain; }
+
+    .shop__label { font-size: 12px; font-weight: 650; margin-bottom: 7px; display: flex; justify-content: space-between; }
+
+    .sizes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+    .sizes label {
+      position: relative;
+      display: grid; place-items: center;
+      height: 38px;
+      border: 1px solid var(--line); border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: border-color .12s, background .12s;
+    }
+
+    .sizes input { position: absolute; opacity: 0; pointer-events: none; }
+    .sizes label:hover { border-color: #c9d1de; }
+    .sizes label:has(input:checked) { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+    .sizes label.is-soldout {
+      color: #b6bdc9; cursor: not-allowed; background: #fbfcfd;
+      text-decoration: line-through;
+    }
+    .sizes label.is-soldout:hover { border-color: var(--line); }
+
+    .shop__cart {
+      width: 100%; height: 42px; margin-top: 14px;
+      border: none; border-radius: 9px;
+      background: var(--ink); color: #fff;
+      font-size: 13.5px; font-weight: 650; cursor: pointer;
+    }
+
+    .shop__cart:hover { background: #000; }
+
+    .shop__slot { margin-top: 10px; }
+
+    .toast-host {
+      position: fixed; right: 20px; bottom: 20px; z-index: 200;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .toast {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-radius: 9px;
+      background: var(--ink); color: #fff;
+      font-size: 13px; font-weight: 550;
+      box-shadow: 0 12px 30px -10px rgba(16,21,31,.5);
+      animation: toast-in .2s ease;
+    }
+
+    @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .tab { display: none; }
+    .tab.is-active { display: block; }
+
+    .divider { height: 1px; background: var(--line-2); margin: 16px 0; }
+
+    .list-check { display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+    .list-check li { display: flex; gap: 8px; align-items: flex-start; }
+    .list-check .mark { flex-shrink: 0; width: 16px; height: 16px; border-radius: 999px; display: grid; place-items: center; font-size: 9px; font-weight: 700; }
+    .mark--ok { background: var(--ok-soft); color: var(--ok); }
+    .mark--no { background: var(--line-2); color: var(--ink-3); }
+
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: minmax(0, 1fr); }
+      .preview-col { position: static; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .nav {
+        position: static; height: auto; flex-direction: row; align-items: center;
+        overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); gap: 12px;
       }
-      .db-table th {
-        background: var(--bg-dark);
-        text-align: left;
-        padding: 10px;
-        font-weight: 700;
-        border-bottom: 2px solid var(--border-color);
-        color: #f8fafc;
-      }
-      .db-table td {
-        padding: 10px;
-        border-bottom: 1px solid var(--border-color);
-      }
-      .db-table tr:hover {
-        background-color: rgba(255,255,255,0.02);
-      }
-      
-      @media (max-width: 1200px) {
-        main {
-          grid-template-columns: 1.2fr 1fr;
-        }
-        .sidebar-column {
-          grid-column: span 2;
-          width: 100% !important;
-        }
-      }
-      .trigger-preset-btn {
-        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
-      }
-      .trigger-preset-btn:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      }
-      .trigger-preset-btn:active {
-        transform: translateY(0);
-      }
-      @media (max-width: 768px) {
-        main {
-          grid-template-columns: 1fr;
-        }
-        .sidebar-column {
-          grid-column: span 1;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
-        <span class="logo-icon">👟</span> ShoeFit Widget
+      .nav__group { flex-direction: row; }
+      .nav__label, .nav__foot { display: none; }
+      .grid-2, .grid-3, .picker--3, .themes { grid-template-columns: 1fr 1fr; }
+      .content { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============================ NAV ============================ -->
+  <aside class="nav">
+    <div class="brand">
+      <span class="brand__mark">👟</span>
+      <span>
+        <span class="brand__name">ShoeFit</span><br />
+        <span class="brand__ver">v2.0 · panel</span>
+      </span>
+    </div>
+
+    <nav class="nav__group">
+      <span class="nav__label">Yapılandırma</span>
+      <button class="nav__item is-active" data-tab="setup">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg>
+        Kurulum
+      </button>
+      <button class="nav__item" data-tab="appearance">
+        <svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 000 20c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a6 6 0 006-6c0-5-4.5-8.6-10-8.6z"/></svg>
+        Görünüm
+      </button>
+    </nav>
+
+    <nav class="nav__group">
+      <span class="nav__label">Veri</span>
+      <button class="nav__item" data-tab="catalog">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        Kalıp verisi
+      </button>
+      <button class="nav__item" data-tab="accuracy">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        Doğruluk
+      </button>
+    </nav>
+
+    <nav class="nav__group">
+      <span class="nav__label">Doğrulama</span>
+      <button class="nav__item" data-tab="sandbox">
+        <svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-6 9a2 2 0 002 3h12a2 2 0 002-3l-6-9V3"/></svg>
+        Test alanı
+      </button>
+    </nav>
+
+    <div class="nav__foot">
+      Demo panel. Ayarlar bu tarayıcıda saklanır.
+    </div>
+  </aside>
+
+  <!-- ============================ MAIN ============================ -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="topbar__title" id="page-title">Kurulum</div>
+        <div class="topbar__sub" id="page-sub">Widget'ı mağazanıza bağlayın</div>
       </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.15s; outline: none;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">← Ana Sayfa / Home</a>
-        <span class="header-badge">MERCHANT PANEL MVP</span>
+      <div class="topbar__actions">
+        <button class="btn btn--ghost btn--sm" onclick="resetAll()">Varsayılana dön</button>
+        <button class="btn btn--primary btn--sm" onclick="saveSettings(true)">Ayarları kaydet</button>
       </div>
     </header>
 
-    <main>
-      <!-- LEFT COLUMN: Dashboard / Customizer Panel -->
-      <section class="panel-card">
-        <div class="panel-tabs">
-          <button class="panel-tab active" onclick="switchTab('tab-customizer', this)">🎨 Widget Özelleştirici</button>
-          <button class="panel-tab" onclick="switchTab('tab-analytics', this)">📊 Canlı Analitikler</button>
-          <button class="panel-tab" onclick="switchTab('tab-mappings', this)">👟 Ürün Eşleştirme</button>
-          <button class="panel-tab" onclick="switchTab('tab-db', this)">📦 Marka Kalıp Verileri</button>
-        </div>
+    <div class="content">
 
-        <!-- TAB 1: Widget Customizer -->
-        <div id="tab-customizer" class="tab-content active">
-          
-          <div class="sub-tabs">
-            <button class="sub-tab active" onclick="switchSubTab('subtab-button', this)">🔘 Tetikleyici Buton</button>
-            <button class="sub-tab" onclick="switchSubTab('subtab-sidebar', this)">🎨 Sidebar Görünümü</button>
-            <button class="sub-tab" onclick="switchSubTab('subtab-integration', this)">🔗 Entegrasyon Ayarları</button>
-          </div>
-
-          <!-- SUBTAB 1: Tetikleyici Buton Tasarımı -->
-          <div id="subtab-button" class="sub-tab-content active">
-            <div style="border: 1px solid rgba(59, 130, 246, 0.15); background: rgba(59, 130, 246, 0.02); padding: 16px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-              <h4 style="margin: 0 0 12px 0; color: #3b82f6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-                <span>🔘 Tetikleyici Buton Tasarımı</span>
-                <span style="font-size: 0.7rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Butonu Etkiler</span>
-              </h4>
-
-              <!-- Hidden inputs to preserve existing functionality -->
-              <input type="hidden" id="opt-show-add-to-cart" value="true" />
-              <input type="hidden" id="opt-show-select-size" value="true" />
-
-              <div class="form-row" style="margin-bottom: 12px;">
-                <div class="form-group">
-                  <label for="opt-btn-color">Buton Teması (Birincil Renk)</label>
-                  <input type="color" id="opt-btn-color" class="form-control" value="#2563eb" oninput="updateEmbedCode(); applySettings(true);" />
-                </div>
-                <div class="form-group">
-                  <label for="opt-btn-text">Buton Yazı Rengi</label>
-                  <input type="color" id="opt-btn-text" class="form-control" value="#ffffff" oninput="updateEmbedCode(); applySettings(true);" />
+      <!-- ================= KURULUM ================= -->
+      <section class="tab is-active" id="tab-setup">
+        <div class="layout">
+          <div>
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">1 · Platformunuz</div>
+                  <p class="card__desc">Seçim, aşağıdaki CSS seçicilerini o platformun standart yapısına göre doldurur.</p>
                 </div>
               </div>
+              <div class="card__body">
+                <div class="picker picker--3" id="platform-picker">
+                  <button class="pick is-active" data-platform="custom">
+                    <span class="pick__name">Özel / diğer</span>
+                    <span class="pick__meta">Seçicileri kendiniz verin</span>
+                  </button>
+                  <button class="pick" data-platform="shopify">
+                    <span class="pick__name">Shopify</span>
+                    <span class="pick__meta">Varyantlar otomatik okunur</span>
+                  </button>
+                  <button class="pick" data-platform="woocommerce">
+                    <span class="pick__name">WooCommerce</span>
+                    <span class="pick__meta">Varyasyon formundan okunur</span>
+                  </button>
+                </div>
 
-              <div class="form-row" style="margin-bottom: 16px;">
-                <div class="form-group">
-                  <label for="opt-radius">Border Radius (Köşe Yuvarlama)</label>
-                  <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
-                    <input type="range" id="opt-radius" min="0" max="30" value="16" class="form-control" style="padding: 0;" oninput="updateRadiusLabel(this.value); updateEmbedCode(); applySettings(true);" />
-                    <span id="radius-val" style="font-size: 0.88rem; font-weight: 700; width: 40px; color: #94a3b8;">16px</span>
+                <div class="note note--info" style="margin-top: 14px;" id="platform-note">
+                  <span class="note__icon">ℹ</span>
+                  <span>Shopify ve WooCommerce'te beden listesi ve stok durumu platformun kendi verisinden okunur; ayrıca seçici vermenize gerek kalmaz.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">2 · Sayfa bağlantıları</div>
+                  <p class="card__desc">Widget'ın ürün sayfasında neye bakacağını belirler. Yalnızca ilki zorunludur.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="field">
+                  <label class="field__label" for="cfg-target">Buton konumu <span class="badge badge--err">zorunlu</span></label>
+                  <input class="input input--mono" id="cfg-target" value="#demo-cart-btn" oninput="onConfigChange()" />
+                  <span class="field__hint">"Bedenimi bul" butonu bu elemanın hemen yanına eklenir.</span>
+                  <span class="field__hint" id="target-error" style="color: var(--err); display: none;">Bu alan boş bırakılamaz.</span>
+                </div>
+
+                <div class="field">
+                  <span class="field__label">Ekleme yönü</span>
+                  <div class="segment" id="seg-position">
+                    <button class="is-active" data-value="after">Sonrasına</button>
+                    <button data-value="before">Öncesine</button>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label for="opt-btn-font-size">Yazı Boyutu (Font Size)</label>
-                  <div style="display: flex; gap: 10px; align-items: center; height: 40px;">
-                    <input type="range" id="opt-btn-font-size" min="10" max="24" value="14" class="form-control" style="padding: 0;" oninput="updateFontSizeLabel(this.value); updateEmbedCode(); applySettings(true);" />
-                    <span id="font-size-val" style="font-size: 0.88rem; font-weight: 700; width: 40px; color: #94a3b8;">14px</span>
+
+                <div class="divider"></div>
+
+                <div class="grid-2">
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-size">Beden seçici</label>
+                    <input class="input input--mono" id="cfg-size" value="#demo-sizes" oninput="onConfigChange()" />
+                    <span class="field__hint">Stok ve satılan numaralar buradan okunur.</span>
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-cart">Sepete ekle butonu</label>
+                    <input class="input input--mono" id="cfg-cart" value="#demo-cart-btn" oninput="onConfigChange()" />
+                    <span class="field__hint">Boş bırakılırsa yalnızca beden seçilir.</span>
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-brand-sel">Marka alanı</label>
+                    <input class="input input--mono" id="cfg-brand-sel" value="#demo-brand" oninput="onConfigChange()" />
+                    <span class="field__hint">Ürünün markasını otomatik tanımak için.</span>
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-model-sel">Model / başlık alanı</label>
+                    <input class="input input--mono" id="cfg-model-sel" value="#demo-title" oninput="onConfigChange()" />
+                    <span class="field__hint">Model kalıbı bilinirse öneri isabeti artar.</span>
                   </div>
                 </div>
-              </div>
 
-              <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px;">Hazır Buton Tasarım Örnekleri (Tıkla ve Uygula)</label>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                  <button type="button" class="trigger-preset-btn" style="background: #2563eb; color: #ffffff; border-radius: 8px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#2563eb', '#ffffff', 8, 14)">Modern Blue</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #1f2937; color: #ffffff; border-radius: 12px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#1f2937', '#ffffff', 12, 14)">Dark Charcoal</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #10b981; color: #ffffff; border-radius: 30px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#10b981', '#ffffff', 30, 13)">Eco Green</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #ef4444; color: #ffffff; border-radius: 10px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ef4444', '#ffffff', 10, 14)">Bright Crimson</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #8b5cf6; color: #ffffff; border-radius: 16px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#8b5cf6', '#ffffff', 16, 14)">Soft Purple</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #f97316; color: #ffffff; border-radius: 30px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#f97316', '#ffffff', 30, 14)">Nike Orange</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #e2e8f0; color: #0f172a; border-radius: 6px; font-size: 13px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#e2e8f0', '#0f172a', 6, 13)">Clean Light</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #d97706; color: #ffffff; border-radius: 4px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#d97706', '#ffffff', 4, 14)">Luxury Gold</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #ec4899; color: #ffffff; border-radius: 20px; font-size: 14px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#ec4899', '#ffffff', 20, 14)">Rose Velvet</button>
-                  <button type="button" class="trigger-preset-btn" style="background: #09090b; color: #ffffff; border-radius: 6px; font-size: 15px; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-align: center;" onclick="applyTriggerPreset('#09090b', '#ffffff', 6, 15)">Monochrome Dark</button>
-                </div>
-              </div>
-            </div>
-          </div>
+                <div class="divider"></div>
 
-          <!-- SUBTAB 2: Beden Asistanı Sidebar Tasarımı -->
-          <div id="subtab-sidebar" class="sub-tab-content">
-            <div style="border: 1px solid rgba(16, 185, 129, 0.15); background: rgba(16, 185, 129, 0.02); padding: 16px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-              <h4 style="margin: 0 0 12px 0; color: #10b981; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-                <span>👟 Beden Asistanı Sidebar Tasarımı</span>
-                <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Sidebar'ı Etkiler</span>
-              </h4>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Dil Modu</label>
-                  <div class="btn-group-toggle" id="group-lang">
-                    <button type="button" class="btn-toggle active" data-value="auto" onclick="setToggleOption('lang', 'auto')">Otomatik</button>
-                    <button type="button" class="btn-toggle" data-value="tr" onclick="setToggleOption('lang', 'tr')">Türkçe</button>
-                    <button type="button" class="btn-toggle" data-value="en" onclick="setToggleOption('lang', 'en')">English</button>
+                <div class="grid-2">
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-system">Mağazadaki beden sistemi</label>
+                    <select class="select" id="cfg-system" onchange="onConfigChange()">
+                      <option value="auto">Otomatik algıla</option>
+                      <option value="EU">EU</option>
+                      <option value="US">US</option>
+                      <option value="UK">UK</option>
+                      <option value="CM">CM</option>
+                    </select>
                   </div>
-                  <input type="hidden" id="opt-lang" value="auto" />
-                </div>
-                <div class="form-group">
-                  <label>Seçili Demo Ürün</label>
-                  <select id="opt-product" class="form-control" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 0 10px; font-size: 0.88rem; color: #fff; height: 40px; cursor: pointer; outline: none; width: 100%; font-weight: 600;" onchange="changeProduct(this.value)">
-                    <option value="adidas" data-brand="Adidas" data-title="Adidas Samba OG Shoes" data-img="/samba_product.png">Adidas Samba OG</option>
-                    <option value="nike" data-brand="Nike" data-title="Nike Air Force 1" data-img="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&auto=format&fit=crop&q=60">Nike Air Force 1</option>
-                    <option value="converse" data-brand="Converse" data-title="Converse Chuck 70" data-img="https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=600&auto=format&fit=crop&q=60">Converse Chuck 70</option>
-                    <option value="newbalance" data-brand="New Balance" data-title="New Balance 574" data-img="https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&auto=format&fit=crop&q=60">New Balance 574</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-row" style="margin-top: 12px;">
-                <div class="form-group" style="grid-column: span 2;">
-                  <label>UI Tasarım Şablonu (Style Preset)</label>
-                  <div class="preset-cards-grid">
-                    <div class="preset-card active" data-preset="modern" onclick="selectPreset('modern')">
-                      <div class="preset-icon">⚡</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Modern / Vibrant</span>
-                        <span class="preset-desc">Minimallik ve renkli vurgular.</span>
-                      </div>
-                    </div>
-                    <div class="preset-card" data-preset="glass" onclick="selectPreset('glass')">
-                      <div class="preset-icon">✨</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Glassmorphism</span>
-                        <span class="preset-desc">Buzlu cam efekti ve bulanıklık.</span>
-                      </div>
-                    </div>
-                    <div class="preset-card" data-preset="carbon" onclick="selectPreset('carbon')">
-                      <div class="preset-icon">🖤</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Carbon Minimal</span>
-                        <span class="preset-desc">Karanlık tonlar ve keskin köşeler.</span>
-                      </div>
-                    </div>
-                    <div class="preset-card" data-preset="playful" onclick="selectPreset('playful')">
-                      <div class="preset-icon">🧸</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Playful Rounded</span>
-                        <span class="preset-desc">Neobrutalizm ve kalın çizgiler.</span>
-                      </div>
-                    </div>
-                    <div class="preset-card" data-preset="cyberpunk" onclick="selectPreset('cyberpunk')">
-                      <div class="preset-icon">👾</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Cyberpunk Glow</span>
-                        <span class="preset-desc">Neon renkler ve karanlık tema.</span>
-                      </div>
-                    </div>
-                    <div class="preset-card" data-preset="retro" onclick="selectPreset('retro')">
-                      <div class="preset-icon">📰</div>
-                      <div class="preset-info">
-                        <span class="preset-title">Retro Classic</span>
-                        <span class="preset-desc">Parşömen sarısı ve serif fontlar.</span>
-                      </div>
-                    </div>
-                  </div>
-                  <input type="hidden" id="opt-preset" value="modern" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SUBTAB 3: Entegrasyon & Seçiciler -->
-          <div id="subtab-integration" class="sub-tab-content">
-            
-            <!-- 1. SHOPIFY ONE-CLICK INTEGRATION (En Çok Tercih Edilen) -->
-            <div style="border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.02); padding: 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-              <h4 style="margin: 0 0 8px 0; color: #10b981; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
-                <span>🛍️ Tek Tıkla Shopify Kurulumu (En Çok Tercih Edilen)</span>
-                <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0; margin-left: auto;">Önerilen</span>
-              </h4>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">
-                Shopify mağazanızın adresini yazın, asistanı temanıza otomatik entegre edelim.
-              </p>
-              
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="shopify-store-domain" class="form-control" placeholder="magazaniz.myshopify.com" style="flex: 1; min-width: 200px; border-color: rgba(16, 185, 129, 0.3);" />
-                <button type="button" class="btn-apply" onclick="startShopifyIntegration()" style="padding: 11px 22px; white-space: nowrap; font-size: 0.85rem; margin: 0; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
-                  Shopify ile Entegre Et
-                </button>
-              </div>
-
-              <!-- Integration Steps & Status -->
-              <div id="shopify-status-card" style="display: none; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 10px; padding: 14px; margin-top: 16px; text-align: left;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                  <span id="shopify-status-title" style="font-size: 0.82rem; font-weight: 700; color: #10b981;">🔄 Bağlantı kuruluyor...</span>
-                  <span id="shopify-status-percent" style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">0%</span>
-                </div>
-                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; margin-bottom: 12px;">
-                  <div id="shopify-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #34d399); transition: width 0.3s ease;"></div>
-                </div>
-                <div id="shopify-status-logs" style="font-family: monospace; font-size: 0.72rem; color: #94a3b8; max-height: 80px; overflow-y: auto; line-height: 1.5;">
-                  <!-- Logs inserted dynamically -->
-                </div>
-              </div>
-            </div>
-
-            <!-- 2. WOOCOMMERCE ONE-CLICK INTEGRATION -->
-            <div style="border: 1px solid rgba(6, 182, 212, 0.2); background: rgba(6, 182, 212, 0.02); padding: 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-              <h4 style="margin: 0 0 8px 0; color: #06b6d4; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
-                <span>🔌 Tek Tıkla WooCommerce Kurulumu</span>
-                <span style="font-size: 0.7rem; background: rgba(6, 182, 212, 0.15); color: #06b6d4; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0; margin-left: auto;">API Destekli</span>
-              </h4>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">
-                WordPress / WooCommerce sitenizin adresini girin, REST API bağlantısı üzerinden ShoeFit asistanını otomatik kuralım.
-              </p>
-              
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-                <input type="text" id="wc-store-url" class="form-control" placeholder="https://siteniz.com" style="flex: 1; min-width: 200px; border-color: rgba(6, 182, 212, 0.3);" />
-              </div>
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="wc-consumer-key" class="form-control" placeholder="Müşteri Anahtarı (Consumer Key - ck_...)" style="flex: 1; min-width: 150px; font-size: 0.8rem; border-color: rgba(6, 182, 212, 0.2);" />
-                <input type="password" id="wc-consumer-secret" class="form-control" placeholder="Gizli Anahtar (Consumer Secret - cs_...)" style="flex: 1; min-width: 150px; font-size: 0.8rem; border-color: rgba(6, 182, 212, 0.2);" />
-                <button type="button" class="btn-apply" onclick="startWooCommerceIntegration()" style="padding: 11px 22px; white-space: nowrap; font-size: 0.85rem; margin: 0; background: var(--primary-gradient); border: none; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);">
-                  WooCommerce ile Bağlan
-                </button>
-              </div>
-
-              <!-- WooCommerce Integration Steps & Status -->
-              <div id="wc-status-card" style="display: none; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 10px; padding: 14px; margin-top: 16px; text-align: left;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                  <span id="wc-status-title" style="font-size: 0.82rem; font-weight: 700; color: #06b6d4;">🔄 API doğrulama başlatılıyor...</span>
-                  <span id="wc-status-percent" style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">0%</span>
-                </div>
-                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; margin-bottom: 12px;">
-                  <div id="wc-progress-bar" style="height: 100%; width: 0%; background: var(--primary-gradient); transition: width 0.3s ease;"></div>
-                </div>
-                <div id="wc-status-logs" style="font-family: monospace; font-size: 0.72rem; color: #94a3b8; max-height: 80px; overflow-y: auto; line-height: 1.5;">
-                  <!-- Logs inserted dynamically -->
-                </div>
-              </div>
-            </div>
-
-            <!-- 3. MANUEL MAĞAZA ENTEGRASYON AYARLARI -->
-            <div style="border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.01); padding: 16px; border-radius: 14px; margin-bottom: 20px;">
-              <h4 style="margin: 0 0 12px 0; color: #cbd5e1; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-                <span>🔗 Manuel Entegrasyon & Kod Ayarları</span>
-                <span style="font-size: 0.7rem; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; padding: 2px 8px; border-radius: 999px; font-weight: 700; text-transform: none; letter-spacing: 0;">Bağlantıyı Sağlar</span>
-              </h4>
-
-              <!-- CORE REQUIRED SETTINGS (ALWAYS VISIBLE) -->
-              <div class="form-row" style="margin-bottom: 16px;">
-                <div class="form-group">
-                  <label for="opt-target-selector" style="color: #f87171; font-size: 0.82rem;">* Buton Konumu (Zorunlu)</label>
-                  <p style="font-size: 0.72rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">"Beden Bul" butonunun sayfadaki hangi elementin (örn: sepet butonu) yanına ekleneceğini belirler.</p>
-                  <input type="text" id="opt-target-selector" class="form-control" style="border-color: rgba(248, 113, 113, 0.3); font-size: 0.82rem;" placeholder="Örn: .store-btn-cart veya #sepet-butonu" value="#preview-shoefit-btn" oninput="validateAndUpdate();" />
-                  <span id="target-selector-error" style="color: #f87171; font-size: 0.72rem; margin-top: 4px; display: none;">Lütfen buton konumunu girin.</span>
-                </div>
-                <div class="form-group">
-                  <label>Ekleme Konumu</label>
-                  <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Asistan butonunun, yukarıda belirttiğiniz hedef elementin önüne mi (Before) yoksa arkasına mı (After) ekleneceğini seçer.</p>
-                  <div class="btn-group-toggle" id="group-insert-position">
-                    <button type="button" class="btn-toggle active" data-value="after" onclick="setToggleOption('insert-position', 'after'); validateAndUpdate();">Sonrasına Ekle (After)</button>
-                    <button type="button" class="btn-toggle" data-value="before" onclick="setToggleOption('insert-position', 'before'); validateAndUpdate();">Öncesine Ekle (Before)</button>
-                  </div>
-                  <input type="hidden" id="opt-insert-position" value="after" />
-                </div>
-              </div>
-
-              <!-- COLLAPSIBLE SECTION FOR ADVANCED SELECTORS (LEAST USED - TOGGLE EXPAND) -->
-              <div style="margin-top: 20px;">
-                <button type="button" class="btn-toggle-advanced" onclick="toggleAdvancedSettings()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 10px; color: #cbd5e1; font-weight: 700; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; outline: none; border-style: dashed;">
-                  <span style="font-size: 0.85rem;">⚙️ Gelişmiş Seçici & AI Analiz Ayarları (Opsiyonel / En Az Kullanılanlar)</span>
-                  <span id="advanced-toggle-arrow" style="font-size: 0.75rem; color: #94a3b8;">▼</span>
-                </button>
-
-                <div id="advanced-settings-panel" style="display: none; margin-top: 16px; padding: 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.15); border: 1px dashed rgba(255, 255, 255, 0.06);">
-                  
-                  <div class="form-row" style="margin-bottom: 16px;">
-                    <div class="form-group">
-                      <label for="opt-size-selector">Özel Beden Seçici (Size Selector) CSS</label>
-                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Müşteri bedenini bulduğunda, sitenizdeki ilgili beden seçeneğinin (örn: 42 radio/button) otomatik seçilmesini tetikler.</p>
-                      <input type="text" id="opt-size-selector" class="form-control" placeholder="Örn: .size-option-label" value="input[name='store-size']" onchange="updateEmbedCode(); applySettings();" />
-                    </div>
-                    <div class="form-group">
-                      <label for="opt-cart-selector">Özel Sepete Ekle (Cart Selector) CSS</label>
-                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Önerilen beden bulunduğunda, asistan içinden doğrudan sepete ekleme yapılabilmesi için sitenizin sepete ekle butonunu tetikler.</p>
-                      <input type="text" id="opt-cart-selector" class="form-control" placeholder="Örn: .store-btn-cart" value=".store-btn-cart" onchange="updateEmbedCode(); applySettings();" />
-                    </div>
-                  </div>
-
-                  <div class="form-row" style="margin-bottom: 16px;">
-                    <div class="form-group">
-                      <label for="opt-brand-selector">Özel Hedef Marka Seçici (Brand Selector) CSS</label>
-                      <p style="font-size: 0.74rem; color: #94a3b8; margin: 0 0 4px; line-height: 1.3;">Ürün detay sayfasındaki marka ismini (örn: Adidas) okuyarak asistan içindeki hedef markayı otomatik eşleştirip seçili getirir.</p>
-                      <input type="text" id="opt-brand-selector" class="form-control" placeholder="Örn: #preview-brand" value="#preview-brand" onchange="updateEmbedCode(); applySettings();" />
-                    </div>
-                    <div class="form-group">
-                    </div>
-                  </div>
-
-                  <div class="form-group" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 10px; margin-top: 12px; margin-bottom: 0; position: relative;">
-                    <label style="color: #3b82f6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 0.82rem; width: 100%;">
-                      <span>🤖 Yapay Zeka & URL Selector Analiz Aracı</span>
-                      <span style="font-size: 0.7rem; background: rgba(244, 63, 94, 0.2); color: #f43f5e; padding: 2px 8px; border-radius: 999px; font-weight: 700;">YAKINDA</span>
-                    </label>
-                    
-                    <div style="filter: blur(4px); opacity: 0.5; pointer-events: none; user-select: none;">
-                      <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0 0 10px;">Ürün detay sayfa URL'sini girerek CSS selectorlerini otomatik tespit edin.</p>
-                      <div style="display: flex; gap: 8px;">
-                        <input type="text" id="opt-url-detector" class="form-control" placeholder="https://magaza.com/urun-detay" style="flex: 1;" disabled />
-                        <button type="button" class="btn-apply" style="padding: 10px 14px; font-size: 0.82rem; white-space: nowrap; box-shadow: none;" disabled>
-                          Selectorleri Bul
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <!-- Center overlay text -->
-                    <div style="position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); color: #cbd5e1; font-weight: 700; font-size: 0.82rem; text-shadow: 0 2px 8px rgba(0,0,0,0.8); pointer-events: none;">
-                      Henüz Hazır Değil
-                    </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-gender">Ürün kategorisi</label>
+                    <select class="select" id="cfg-gender" onchange="onConfigChange()">
+                      <option value="auto">Sayfadan algıla</option>
+                      <option value="men">Erkek</option>
+                      <option value="women">Kadın</option>
+                      <option value="kids">Çocuk</option>
+                    </select>
+                    <span class="field__hint">US/UK numaraları kadın ve erkekte farklı ölçektedir.</span>
                   </div>
                 </div>
+
+                <div class="field">
+                  <label class="row-inline" style="cursor: pointer;">
+                    <input type="checkbox" id="cfg-cart-allowed" checked onchange="onConfigChange()" />
+                    <span class="field__label" style="margin: 0;">"Seç ve sepete ekle" butonunu göster</span>
+                  </label>
+                  <span class="field__hint">Kapalıysa widget yalnızca bedeni seçer, sepete dokunmaz.</span>
+                </div>
               </div>
             </div>
 
-            <div class="form-group">
-              <label>Embed Script Kodu (Kopyalanabilir)</label>
-              <div class="code-snippet-box">
-                <button class="copy-btn" onclick="copyEmbedCode()">Kopyala</button>
-                <code id="embed-code-html"></code>
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">3 · Kurulum kodu</div>
+                  <p class="card__desc">Bu satırı ürün sayfası şablonunuza, <code>&lt;/body&gt;</code> etiketinden hemen önce ekleyin.</p>
+                </div>
+                <span class="badge" id="embed-size">—</span>
+              </div>
+              <div class="card__body">
+                <div class="code">
+                  <div class="code__bar">
+                    <span>HTML</span>
+                    <button class="code__copy" onclick="copyCode('embed-html')">Kopyala</button>
+                  </div>
+                  <pre id="embed-html"></pre>
+                </div>
+
+                <div style="margin-top: 12px;">
+                  <div class="code">
+                    <div class="code__bar">
+                      <span>Tarayıcı konsolu — canlı sitede denemek için</span>
+                      <button class="code__copy" onclick="copyCode('embed-console')">Kopyala</button>
+                    </div>
+                    <pre id="embed-console"></pre>
+                  </div>
+                </div>
+
+                <div class="note note--warn" style="margin-top: 12px;">
+                  <span class="note__icon">⚠</span>
+                  <span>Konsol yöntemi yalnızca test içindir; sayfa yenilendiğinde kaybolur.</span>
+                </div>
               </div>
             </div>
 
-            <div class="form-group" style="margin-top: 14px;">
-              <label>Tarayıcı Konsol Kodu (Canlı Mağazada Test Etmek İçin)</label>
-              <div class="code-snippet-box">
-                <button class="copy-btn" onclick="copyConsoleCode()">Kopyala</button>
-                <code id="embed-code-console"></code>
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">4 · Geri bildirim toplama <span class="badge">isteğe bağlı</span></div>
+                  <p class="card__desc">Adres verirseniz her öneri ve müşteri yanıtı sunucunuza da gönderilir. Boşsa veriler yalnızca ziyaretçinin tarayıcısında kalır.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="field" style="margin-top: 0;">
+                  <label class="field__label" for="cfg-endpoint">Toplama adresi</label>
+                  <input class="input input--mono" id="cfg-endpoint" placeholder="https://api.magazaniz.com/shoefit-events" oninput="onConfigChange()" />
+                  <span class="field__hint">POST, JSON gövde. <code>navigator.sendBeacon</code> kullanılır, sayfa yavaşlamaz.</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- TAB 2: Live Analytics -->
-        <div id="tab-analytics" class="tab-content">
-          <div class="kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-label">Görüntülenme</div>
-              <div class="kpi-value" id="kpi-views">1,482</div>
-              <div class="kpi-sub">↑ 14% Bu hafta</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Widget Başlatma</div>
-              <div class="kpi-value" id="kpi-starts">642</div>
-              <div class="kpi-sub">Katılım Oranı: 43%</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Satın Alma Dönüşümü</div>
-              <div class="kpi-value" id="kpi-conversions">380</div>
-              <div class="kpi-sub" style="color: #3b82f6;">Karar Verme: 74%</div>
-            </div>
-          </div>
-
-          <div class="chart-box">
-            <h3 class="chart-title">En Çok Girilen Referans Markalar</h3>
-            <div class="bar-row">
-              <div class="bar-info"><span>Nike</span><span id="stat-brand-1">45%</span></div>
-              <div class="bar-outer"><div class="bar-inner" style="width: 45%; background: #3b82f6;"></div></div>
-            </div>
-            <div class="bar-row">
-              <div class="bar-info"><span>Adidas</span><span id="stat-brand-2">35%</span></div>
-              <div class="bar-outer"><div class="bar-inner" style="width: 35%; background: #10b981;"></div></div>
-            </div>
-            <div class="bar-row">
-              <div class="bar-info"><span>Puma</span><span id="stat-brand-3">10%</span></div>
-              <div class="bar-outer"><div class="bar-inner" style="width: 10%; background: #d62828;"></div></div>
-            </div>
-            <div class="bar-row">
-              <div class="bar-info"><span>New Balance</span><span id="stat-brand-4">10%</span></div>
-              <div class="bar-outer"><div class="bar-inner" style="width: 10%; background: #64748b;"></div></div>
-            </div>
-          </div>
-
-          <h3 class="chart-title">Müşteri Etkileşim Günlüğü (Canlı Log)</h3>
-          <div class="events-log" id="events-log">
-            <div>[System] Canlı event dinleyici hazır. Widget etkileşimleri burada görüntülenecektir...</div>
-          </div>
-        </div>
-
-        <!-- TAB 3: Product Mapping Table -->
-        <div id="tab-mappings" class="tab-content">
-          <p class="db-description" style="font-size: 0.88rem; color: var(--text-muted);">Mağazadaki ürünlerinizin ShoeFit veritabanındaki markalarla eşleştirilmesini buradan yönetirsiniz.</p>
-          <table class="db-table">
-            <thead>
-              <tr>
-                <th>Ürün SKU</th>
-                <th>Ürün Adı</th>
-                <th>Eşleşen Marka</th>
-                <th>Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>prod-samba-12</td>
-                <td>Adidas Samba OG Shoes</td>
-                <td>Adidas</td>
-                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
-              </tr>
-              <tr>
-                <td>prod-pegasus-3</td>
-                <td>Nike Air Zoom Pegasus 40</td>
-                <td>Nike</td>
-                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
-              </tr>
-              <tr>
-                <td>prod-chuck-4</td>
-                <td>Converse Chuck Taylor High</td>
-                <td>Converse</td>
-                <td><span style="color: #10b981; font-weight:700;">Aktif</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- TAB 4: Database Brands View -->
-        <div id="tab-db" class="tab-content">
-          <p class="db-description" style="font-size: 0.88rem; color: var(--text-muted);">Sistemde tanımlı marka kalıp ayarları aşağıdadır:</p>
-          <table class="db-table">
-            <thead>
-              <tr>
-                <th>Marka</th>
-                <th>Kalıp Profili</th>
-                <th>Offset Değeri</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Nike</td>
-                <td>Genellikle dar/standart kalıp.</td>
-                <td>+0.5</td>
-              </tr>
-              <tr>
-                <td>Adidas</td>
-                <td>Genellikle standart kalıp. Nike'a göre geniş.</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td>Puma</td>
-                <td>Sportif modeller hafif dar/sıkı.</td>
-                <td>+0.1</td>
-              </tr>
-              <tr>
-                <td>New Balance</td>
-                <td>Rahat standart kalıp. Konfor odaklı.</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td>Converse</td>
-                <td>Düz taban, büyük kalıp hissedilir.</td>
-                <td>-0.2</td>
-              </tr>
-              <tr>
-                <td>Vans</td>
-                <td>Kaykay stilleri dar hissedilebilir.</td>
-                <td>+0.2</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- TAB 5: Website Live Preview & Injection removed -->
-      </section>
-
-      <!-- RIGHT COLUMN: Mockup E-Commerce Page -->
-      <section class="mock-store-card">
-        <!-- Mock Browser Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
-          <div style="display: flex; gap: 6px;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
-          </div>
-          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.62rem; color: var(--text-muted); padding: 2px 14px; border-radius: 6px; font-family: monospace; letter-spacing: 0.02em; user-select: none;">
-            demo-store.com/samba-og
-          </div>
-          <div style="width: 30px;"></div>
-        </div>
-
-        <span class="store-badge">Demo Storefront</span>
-        <div class="product-brand" id="preview-brand" style="font-size: 0.85rem; font-weight: 700; color: #10b981; text-transform: uppercase; margin-bottom: 2px;">Adidas</div>
-        <h1 class="product-title" id="preview-title">Adidas Samba OG Shoes</h1>
-        <div class="product-price" id="preview-price">$120.00</div>
-
-        <div class="product-img-container">
-          <img class="product-img" id="preview-img" src="/samba_product.png" alt="Sneaker Image" style="object-fit: contain; background: rgba(255,255,255,0.02); border-radius: 12px;" />
-        </div>
-
-        <!-- Store Page Size Options -->
-        <div>
-          <span class="size-selector-label">Numara Seçimi (Size)</span>
-          <div class="size-success-toast" id="size-toast">✓ Önerilen beden seçildi!</div>
-          <div class="size-options" id="size-options-container">
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-40" name="store-size" value="40" onchange="logStoreSizeSelect('40')" />
-              <label for="store-sz-40" class="size-option-label">40</label>
-            </div>
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-41" name="store-size" value="41" onchange="logStoreSizeSelect('41')" />
-              <label for="store-sz-41" class="size-option-label">41</label>
-            </div>
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-42" name="store-size" value="42" onchange="logStoreSizeSelect('42')" />
-              <label for="store-sz-42" class="size-option-label">42</label>
-            </div>
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-42.5" name="store-size" value="42.5" onchange="logStoreSizeSelect('42.5')" />
-              <label for="store-sz-42.5" class="size-option-label">42.5</label>
-            </div>
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-43" name="store-size" value="43" onchange="logStoreSizeSelect('43')" />
-              <label for="store-sz-43" class="size-option-label">43</label>
-            </div>
-            <div class="size-option-item">
-              <input type="radio" id="store-sz-44" name="store-size" value="44" onchange="logStoreSizeSelect('44')" />
-              <label for="store-sz-44" class="size-option-label">44</label>
-            </div>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center; width: 100%;">
-          <button class="store-btn-cart" type="button" style="flex: 1.2; margin-top: 0;" onclick="alert('Sepete Eklendi!')">Sepete Ekle</button>
-          <button id="preview-shoefit-btn" class="store-btn-shoefit" type="button" style="flex: 0.8; background: #2563eb; color: white; border: none; border-radius: 12px; padding: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(37,99,235,0.2); height: 44px; transition: transform 0.15s ease;" onclick="scrollToSidebar()">
-            📐 Beden Bul
-          </button>
+          <div class="preview-col" id="preview-slot-setup"></div>
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: Widget Sidebar -->
-      <section class="sidebar-column" style="width: 380px;">
-        <!-- EMBED POINT FOR SHOEFIT WIDGET -->
-        <div
-          id="shoefit-widget"
-          data-store-id="STORE_DEMO"
-          data-product-id="prod-samba-12"
-          data-brand="Adidas"
-          data-size-system="EU"
-          data-target-selector="#preview-shoefit-btn"
-          data-brand-selector="#preview-brand"
-          data-size-selector="input[name='store-size']"
-          data-cart-selector=".store-btn-cart"
-          data-button-color="#2563eb"
-          data-button-text-color="#ffffff"
-          data-border-radius="16px"
-          data-language="auto"
-          data-show-add-to-cart="true"
-          data-show-select-size="true"
-          data-style-preset="modern"
-        ></div>
+      <!-- ================= GÖRÜNÜM ================= -->
+      <section class="tab" id="tab-appearance">
+        <div class="layout">
+          <div>
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">Tema</div>
+                  <p class="card__desc">Tema yalnızca renk ve köşe değişkenlerini değiştirir; yapı her temada aynıdır.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="themes" id="theme-picker">
+                  <button class="theme is-active" data-theme="modern">
+                    <span class="theme__swatch" style="background: #ffffff;">
+                      <span class="theme__chip" style="background: #2563eb;"></span>
+                      <span class="theme__chip" style="background: #e2e8f0;"></span>
+                    </span>
+                    <span class="theme__name">Modern</span>
+                  </button>
+                  <button class="theme" data-theme="midnight">
+                    <span class="theme__swatch" style="background: #0f1420;">
+                      <span class="theme__chip" style="background: #60a5fa;"></span>
+                      <span class="theme__chip" style="background: #334155;"></span>
+                    </span>
+                    <span class="theme__name">Midnight</span>
+                  </button>
+                  <button class="theme" data-theme="glass">
+                    <span class="theme__swatch" style="background: linear-gradient(135deg,#dbeafe,#f8fafc);">
+                      <span class="theme__chip" style="background: rgba(255,255,255,.85);"></span>
+                      <span class="theme__chip" style="background: #93c5fd;"></span>
+                    </span>
+                    <span class="theme__name">Glass</span>
+                  </button>
+                  <button class="theme" data-theme="minimal">
+                    <span class="theme__swatch" style="background: #ffffff;">
+                      <span class="theme__chip" style="background: #0f172a;"></span>
+                      <span class="theme__chip" style="background: #f1f5f9;"></span>
+                    </span>
+                    <span class="theme__name">Minimal</span>
+                  </button>
+                  <button class="theme" data-theme="vivid">
+                    <span class="theme__swatch" style="background: #fff4e6;">
+                      <span class="theme__chip" style="background: #ea580c;"></span>
+                      <span class="theme__chip" style="background: #fed7aa;"></span>
+                    </span>
+                    <span class="theme__name">Vivid</span>
+                  </button>
+                  <button class="theme" data-theme="mono">
+                    <span class="theme__swatch" style="background: #ffffff;">
+                      <span class="theme__chip" style="background: #111111;"></span>
+                      <span class="theme__chip" style="background: #d4d4d4;"></span>
+                    </span>
+                    <span class="theme__name">Mono</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">Tetikleyici butonu</div>
+                  <p class="card__desc">Ürün sayfasında görünen butonun görünümü ve metni.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="grid-2">
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-color">Arka plan</label>
+                    <input class="input" type="color" id="cfg-color" value="#2563eb" oninput="onConfigChange()" />
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="cfg-text-color">Yazı rengi</label>
+                    <input class="input" type="color" id="cfg-text-color" value="#ffffff" oninput="onConfigChange()" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="cfg-radius">Köşe yuvarlaklığı</label>
+                  <div class="row-inline">
+                    <input class="input" type="range" id="cfg-radius" min="0" max="28" value="16" oninput="onConfigChange()" />
+                    <span class="value-badge" id="radius-label">16px</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="cfg-font">Yazı boyutu</label>
+                  <div class="row-inline">
+                    <input class="input" type="range" id="cfg-font" min="11" max="20" value="14" oninput="onConfigChange()" />
+                    <span class="value-badge" id="font-label">14px</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="cfg-label">Buton metni</label>
+                  <input class="input" id="cfg-label" placeholder="Bedenimi bul" oninput="onConfigChange()" />
+                  <span class="field__hint">Boş bırakılırsa dile göre otomatik seçilir. Ziyaretçinin kayıtlı profili varsa buton doğrudan bedenini gösterir.</span>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="cfg-lang">Dil</label>
+                  <div class="segment" id="seg-lang">
+                    <button class="is-active" data-value="auto">Otomatik</button>
+                    <button data-value="tr">Türkçe</button>
+                    <button data-value="en">English</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-col" id="preview-slot-appearance"></div>
+        </div>
       </section>
-    </main>
-
-    <!-- LOAD THE WIDGET BUNDLE AS A MODULE -->
-    <script type="module">
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = isLocal ? '/src/widget/embed.ts' : '/shoe-size-widget.js';
-      document.body.appendChild(script);
-    </script>
-
-    <!-- CONTROL PANEL LOGIC -->
-    <script>
-      function showToast(msg) {
-        const toast = document.getElementById('size-toast');
-        if (toast) {
-          toast.textContent = `✓ ${msg}`;
-          toast.style.display = 'block';
-          setTimeout(() => { toast.style.display = 'none'; }, 4000);
-        }
-      }
-
-      function startShopifyIntegration() {
-        const domain = document.getElementById('shopify-store-domain').value.trim();
-        if (!domain) {
-          alert('Lütfen geçerli bir Shopify mağaza adresi girin (örn: magazaniz.myshopify.com).');
-          return;
-        }
-
-        const statusCard = document.getElementById('shopify-status-card');
-        const statusTitle = document.getElementById('shopify-status-title');
-        const statusPercent = document.getElementById('shopify-status-percent');
-        const progressBar = document.getElementById('shopify-progress-bar');
-        const logsDiv = document.getElementById('shopify-status-logs');
-
-        statusCard.style.display = 'block';
-        logsDiv.innerHTML = '';
-        progressBar.style.width = '0%';
-        statusPercent.textContent = '0%';
-        statusTitle.innerHTML = '🔄 Shopify API Bağlantısı Kuruluyor...';
-
-        const logs = [
-          { time: 500, text: `Shopify mağaza adresi doğrulanıyor: ${domain}...`, progress: 15 },
-          { time: 1200, text: 'Mağaza SSL sertifikası kontrol edildi: Aktif', progress: 30 },
-          { time: 2000, text: 'OAuth izin isteği gönderiliyor (read_themes, write_script_tags)...', progress: 50 },
-          { time: 2800, text: 'Aktif Shopify teması analiz ediliyor: Dawn Theme v12.0', progress: 70 },
-          { time: 3500, text: 'Beden tablosu ve sepete ekle selectorleri eşleştiriliyor...', progress: 85 },
-          { time: 4200, text: 'ShoeFit App Embed script bloğu aktif edildi!', progress: 100 }
-        ];
-
-        logs.forEach(log => {
-          setTimeout(() => {
-            const entry = document.createElement('div');
-            entry.textContent = `> ${log.text}`;
-            entry.style.color = '#34d399';
-            entry.style.marginBottom = '2px';
-            logsDiv.appendChild(entry);
-            logsDiv.scrollTop = logsDiv.scrollHeight;
-            progressBar.style.width = `${log.progress}%`;
-            statusPercent.textContent = `${log.progress}%`;
-
-            if (log.progress === 100) {
-              statusTitle.innerHTML = '🎉 Entegrasyon Başarıyla Tamamlandı!';
-              showToast('Shopify Entegrasyonu Aktif Edildi!');
-              localStorage.setItem('shopify_connected_domain', domain);
-            }
-          }, log.time);
-        });
-      }
-
-      function startWooCommerceIntegration() {
-        const url = document.getElementById('wc-store-url').value.trim();
-        const ck = document.getElementById('wc-consumer-key').value.trim();
-        const cs = document.getElementById('wc-consumer-secret').value.trim();
-
-        if (!url) {
-          alert('Lütfen geçerli bir WooCommerce site adresi girin.');
-          return;
-        }
-
-        const statusCard = document.getElementById('wc-status-card');
-        const statusTitle = document.getElementById('wc-status-title');
-        const statusPercent = document.getElementById('wc-status-percent');
-        const progressBar = document.getElementById('wc-progress-bar');
-        const logsDiv = document.getElementById('wc-status-logs');
-
-        statusCard.style.display = 'block';
-        logsDiv.innerHTML = '';
-        progressBar.style.width = '0%';
-        statusPercent.textContent = '0%';
-        statusTitle.innerHTML = '🔄 WooCommerce REST API Bağlantısı Kuruluyor...';
-
-        const logs = [
-          { time: 500, text: `WooCommerce site adresi doğrulanıyor: ${url}...`, progress: 15 },
-          { time: 1200, text: 'REST API endpointleri sorgulanıyor (/wp-json/wc/v3)...', progress: 35 },
-          { time: 2000, text: ck && cs ? 'API Anahtarları (Consumer Key & Secret) doğrulanıyor...' : 'Anonim API bağlantısı kuruluyor (Sınırlı mod)...', progress: 55 },
-          { time: 2800, text: 'WordPress eklentileri tarandı: WooCommerce aktif tespit edildi.', progress: 75 },
-          { time: 3500, text: 'wp_footer kancasına ShoeFit entegrasyon betiği enjekte ediliyor...', progress: 90 },
-          { time: 4200, text: 'WooCommerce asistan entegrasyonu tamamlandı ve yayına alındı!', progress: 100 }
-        ];
-
-        logs.forEach(log => {
-          setTimeout(() => {
-            const entry = document.createElement('div');
-            entry.textContent = `> ${log.text}`;
-            entry.style.color = '#c084fc';
-            entry.style.marginBottom = '2px';
-            logsDiv.appendChild(entry);
-            logsDiv.scrollTop = logsDiv.scrollHeight;
-            progressBar.style.width = `${log.progress}%`;
-            statusPercent.textContent = `${log.progress}%`;
-
-            if (log.progress === 100) {
-              statusTitle.innerHTML = '🎉 WooCommerce Entegrasyonu Başarılı!';
-              showToast('WooCommerce Entegrasyonu Aktif Edildi!');
-              localStorage.setItem('wc_connected_url', url);
-              if (ck) localStorage.setItem('wc_connected_ck', ck);
-              if (cs) localStorage.setItem('wc_connected_cs', cs);
-            }
-          }, log.time);
-        });
-      }
-
-      function switchTab(tabId, el) {
-        const tabs = document.querySelectorAll('.panel-tab');
-        tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        const contents = document.querySelectorAll('.tab-content');
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-      }
-
-      function switchSubTab(subTabId, el) {
-        const subTabs = el.parentElement.querySelectorAll('.sub-tab');
-        subTabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        const contents = el.parentElement.parentElement.querySelectorAll('.sub-tab-content');
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(subTabId).classList.add('active');
-      }
-
-      function selectPreset(presetVal) {
-        document.querySelectorAll('.preset-card').forEach(card => {
-          card.classList.remove('active');
-        });
-        const activeCard = document.querySelector(`.preset-card[data-preset="${presetVal}"]`);
-        if (activeCard) {
-          activeCard.classList.add('active');
-        }
-        document.getElementById('opt-preset').value = presetVal;
-        updateEmbedCode();
-        applySettings();
-      }
-
-      function setToggleOption(optionName, val) {
-        const group = document.getElementById(`group-${optionName}`);
-        if (group) {
-          group.querySelectorAll('.btn-toggle').forEach(btn => {
-            if (btn.dataset.value === val) {
-              btn.classList.add('active');
-            } else {
-              btn.classList.remove('active');
-            }
-          });
-        }
-        document.getElementById(`opt-${optionName}`).value = val;
-        updateEmbedCode();
-        applySettings();
-      }
-
-      function updateRadiusLabel(val) {
-        document.getElementById('radius-val').textContent = val + 'px';
-      }
-
-      function updateFontSizeLabel(val) {
-        document.getElementById('font-size-val').textContent = val + 'px';
-      }
-
-      function applyTriggerPreset(color, textColor, radius, fontSize) {
-        document.getElementById('opt-btn-color').value = color;
-        document.getElementById('opt-btn-text').value = textColor;
-        document.getElementById('opt-radius').value = radius;
-        updateRadiusLabel(radius);
-        
-        const fontSizeEl = document.getElementById('opt-btn-font-size');
-        if (fontSizeEl) {
-          fontSizeEl.value = fontSize;
-          updateFontSizeLabel(fontSize);
-        }
-        
-        updateEmbedCode();
-        applySettings(true);
-      }
-
-      function saveAllSettings() {
-        const settings = {
-          color: document.getElementById('opt-btn-color').value,
-          textColor: document.getElementById('opt-btn-text').value,
-          radius: document.getElementById('opt-radius').value,
-          fontSize: document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14',
-          lang: document.getElementById('opt-lang').value,
-          preset: document.getElementById('opt-preset').value,
-          targetSel: document.getElementById('opt-target-selector').value,
-          insertPos: document.getElementById('opt-insert-position').value,
-          sizeSel: document.getElementById('opt-size-selector').value,
-          cartSel: document.getElementById('opt-cart-selector').value,
-          brandSel: document.getElementById('opt-brand-selector').value
-        };
-        localStorage.setItem('shoefit_merchant_settings', JSON.stringify(settings));
-      }
-
-      function setToggleOptionWithoutApply(optionName, val) {
-        const group = document.getElementById(`group-${optionName}`);
-        if (group) {
-          group.querySelectorAll('.btn-toggle').forEach(btn => {
-            if (btn.dataset.value === val) {
-              btn.classList.add('active');
-            } else {
-              btn.classList.remove('active');
-            }
-          });
-        }
-        document.getElementById(`opt-${optionName}`).value = val;
-      }
-
-      function selectPresetWithoutApply(presetVal) {
-        document.querySelectorAll('.preset-card').forEach(card => {
-          card.classList.remove('active');
-        });
-        const activeCard = document.querySelector(`.preset-card[data-preset="${presetVal}"]`);
-        if (activeCard) {
-          activeCard.classList.add('active');
-        }
-        document.getElementById('opt-preset').value = presetVal;
-      }
-
-      function loadAllSettings() {
-        try {
-          const data = localStorage.getItem('shoefit_merchant_settings');
-          if (!data) return;
-          const settings = JSON.parse(data);
-          if (settings.color) {
-            document.getElementById('opt-btn-color').value = settings.color;
-          }
-          if (settings.textColor) {
-            document.getElementById('opt-btn-text').value = settings.textColor;
-          }
-          if (settings.radius) {
-            document.getElementById('opt-radius').value = settings.radius;
-          }
-          if (settings.fontSize && document.getElementById('opt-btn-font-size')) {
-            document.getElementById('opt-btn-font-size').value = settings.fontSize;
-          }
-          if (settings.lang) {
-            setToggleOptionWithoutApply('lang', settings.lang);
-          }
-          if (settings.preset) {
-            selectPresetWithoutApply(settings.preset);
-          }
-          if (settings.targetSel !== undefined) {
-            document.getElementById('opt-target-selector').value = settings.targetSel;
-          }
-          if (settings.insertPos) {
-            setToggleOptionWithoutApply('insert-position', settings.insertPos);
-          }
-          if (settings.sizeSel !== undefined) {
-            document.getElementById('opt-size-selector').value = settings.sizeSel;
-          }
-          if (settings.cartSel !== undefined) {
-            document.getElementById('opt-cart-selector').value = settings.cartSel;
-          }
-          if (settings.brandSel !== undefined) {
-            document.getElementById('opt-brand-selector').value = settings.brandSel;
-          }
-          const shopifyDomain = localStorage.getItem('shopify_connected_domain');
-          if (shopifyDomain && document.getElementById('shopify-store-domain')) {
-            document.getElementById('shopify-store-domain').value = shopifyDomain;
-            document.getElementById('shopify-status-card').style.display = 'block';
-            document.getElementById('shopify-status-title').innerHTML = '🎉 Entegrasyon Aktif (Shopify)';
-            document.getElementById('shopify-status-percent').textContent = '100%';
-            document.getElementById('shopify-progress-bar').style.width = '100%';
-            document.getElementById('shopify-status-logs').innerHTML = '<div style="color: #34d399;">> Mağaza bağlantısı aktif: ' + shopifyDomain + '</div><div style="color: #34d399;">> Son güncelleme: Entegrasyon yayında!</div>';
-          }
-          const wcUrl = localStorage.getItem('wc_connected_url');
-          const wcCk = localStorage.getItem('wc_connected_ck');
-          const wcCs = localStorage.getItem('wc_connected_cs');
-          if (wcUrl && document.getElementById('wc-store-url')) {
-            document.getElementById('wc-store-url').value = wcUrl;
-            if (wcCk) document.getElementById('wc-consumer-key').value = wcCk;
-            if (wcCs) document.getElementById('wc-consumer-secret').value = wcCs;
-
-            document.getElementById('wc-status-card').style.display = 'block';
-            document.getElementById('wc-status-title').innerHTML = '🎉 Entegrasyon Aktif (WooCommerce)';
-            document.getElementById('wc-status-percent').textContent = '100%';
-            document.getElementById('wc-progress-bar').style.width = '100%';
-            document.getElementById('wc-status-logs').innerHTML = '<div style="color: #c084fc;">> Mağaza bağlantısı aktif: ' + wcUrl + '</div><div style="color: #c084fc;">> REST API Durumu: Bağlantı hazır ve çalışıyor.</div>';
-          }
-        } catch (e) {
-          console.error('Error loading settings:', e);
-        }
-      }
-
-      function validateAndUpdate() {
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        const errSpan = document.getElementById('target-selector-error');
-        const copyBtns = document.querySelectorAll('.copy-btn');
-        const codeHtml = document.getElementById('embed-code-html');
-        const codeConsole = document.getElementById('embed-code-console');
-
-        if (!targetSel) {
-          errSpan.style.display = 'block';
-          copyBtns.forEach(btn => btn.style.display = 'none');
-          const errMsg = 'Lütfen zorunlu olan "Buton Konumu" alanını doldurun...';
-          codeHtml.innerText = errMsg;
-          if (codeConsole) codeConsole.innerText = errMsg;
-          return false;
-        } else {
-          errSpan.style.display = 'none';
-          copyBtns.forEach(btn => btn.style.display = 'block');
-          updateEmbedCode();
-          applySettings();
-          return true;
-        }
-      }
-
-      function updateEmbedCode() {
-        const color = document.getElementById('opt-btn-color').value;
-        const textColor = document.getElementById('opt-btn-text').value;
-        const radius = document.getElementById('opt-radius').value;
-        const fontSizeEl = document.getElementById('opt-btn-font-size');
-        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
-        const lang = document.getElementById('opt-lang').value;
-        const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
-        const showSelectSize = document.getElementById('opt-show-select-size').value;
-        const preset = document.getElementById('opt-preset').value;
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        const insertPos = document.getElementById('opt-insert-position').value;
-
-        if (!targetSel) {
-          const errMsg = 'Lütfen zorunlu olan "Beden Tablosu Hedef Element CSS Seçicisi" alanını doldurun...';
-          document.getElementById('embed-code-html').innerText = errMsg;
-          const consoleCodeBox = document.getElementById('embed-code-console');
-          if (consoleCodeBox) consoleCodeBox.innerText = errMsg;
-          return;
-        }
-
-        const sel = document.getElementById('opt-product');
-        const opt = sel.options[sel.selectedIndex];
-        const brand = opt.dataset.brand;
-        const brandSelVal = document.getElementById('opt-brand-selector').value;
-
-        const code = `<!-- Embed Script -->
-<script 
-  src="https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js" 
-  data-store-id="STORE_DEMO"
-  data-product-id="prod-samba-12"
-  data-brand="${brand}"
-  data-size-system="EU"
-  data-target-selector="${targetSel}"
-  data-insert-position="${insertPos}"
-  data-button-color="${color}"
-  data-button-text-color="${textColor}"
-  data-border-radius="${radius}px"
-  data-button-font-size="${fontSize}px"
-  data-language="${lang}"
-  data-show-add-to-cart="${showAddToCart}"
-  data-show-select-size="${showSelectSize}"
-  data-style-preset="${preset}"
-  data-size-selector="${document.getElementById('opt-size-selector').value}"
-  data-cart-selector="${document.getElementById('opt-cart-selector').value}"
-  data-brand-selector="${brandSelVal}"
-  async>
-<\/script>`;
-
-        document.getElementById('embed-code-html').innerText = code;
-
-        const sizeSelVal = document.getElementById('opt-size-selector').value;
-        const cartSelVal = document.getElementById('opt-cart-selector').value;
-
-        const consoleCode = `// ADIM 1: Widget script'i yükle
-const s = document.createElement('script');
-s.type = 'module';
-s.src = 'https://sizeselect-ecommerce.netlify.app/shoe-size-widget.js';
-document.head.appendChild(s);
-
-// ADIM 2: Script yüklendikten sonra yapılandır ve başlat
-s.onload = () => window.ShoeFitWidget.init({
-  storeId: 'STORE_1',
-  brand: '${brand}',
-  targetSelector: '${targetSel}',
-  insertPosition: '${insertPos}',
-  buttonColor: '${color}',
-  buttonTextColor: '${textColor}',
-  borderRadius: '${radius}px',
-  buttonFontSize: '${fontSize}px',
-  language: '${lang}',
-  showAddToCart: '${showAddToCart}',
-  showSelectSize: '${showSelectSize}',
-  stylePreset: '${preset}',
-  sizeSelector: '${sizeSelVal}',
-  cartSelector: '${cartSelVal}',
-  brandSelector: '${brandSelVal}'
-});`;
-
-        const consoleCodeBox = document.getElementById('embed-code-console');
-        if (consoleCodeBox) consoleCodeBox.innerText = consoleCode;
-      }
-
-      function applySettings(onlyStyle = false) {
-        const color = document.getElementById('opt-btn-color').value;
-        const textColor = document.getElementById('opt-btn-text').value;
-        const radius = document.getElementById('opt-radius').value;
-        const fontSizeEl = document.getElementById('opt-btn-font-size');
-        const fontSize = fontSizeEl ? fontSizeEl.value : '14';
-        const lang = document.getElementById('opt-lang').value;
-        const showAddToCart = document.getElementById('opt-show-add-to-cart').value;
-        const showSelectSize = document.getElementById('opt-show-select-size').value;
-        const preset = document.getElementById('opt-preset').value;
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        const insertPos = document.getElementById('opt-insert-position').value;
-
-        const sel = document.getElementById('opt-product');
-        const opt = sel.options[sel.selectedIndex];
-        const brand = opt.dataset.brand;
-        const brandSelVal = document.getElementById('opt-brand-selector').value;
-
-        const widgetDiv = document.getElementById('shoefit-widget');
-        if (widgetDiv) {
-          widgetDiv.setAttribute('data-brand', brand);
-          widgetDiv.setAttribute('data-button-color', color);
-          widgetDiv.setAttribute('data-button-text-color', textColor);
-          widgetDiv.setAttribute('data-border-radius', radius + 'px');
-          widgetDiv.setAttribute('data-button-font-size', fontSize + 'px');
-          widgetDiv.setAttribute('data-language', lang);
-          widgetDiv.setAttribute('data-show-add-to-cart', showAddToCart);
-          widgetDiv.setAttribute('data-show-select-size', showSelectSize);
-          widgetDiv.setAttribute('data-style-preset', preset);
-          widgetDiv.setAttribute('data-target-selector', targetSel);
-          widgetDiv.setAttribute('data-insert-position', insertPos);
-          widgetDiv.setAttribute('data-size-selector', document.getElementById('opt-size-selector').value);
-          widgetDiv.setAttribute('data-cart-selector', document.getElementById('opt-cart-selector').value);
-          widgetDiv.setAttribute('data-brand-selector', brandSelVal);
-
-          // Update CSS custom properties on shadow host dynamically for visual-only styles
-          const host = widgetDiv.querySelector('[data-ssw-host]');
-          if (host) {
-            host.style.setProperty('--ssw-primary', color);
-            host.style.setProperty('--ssw-text-on-primary', textColor);
-            host.style.setProperty('--ssw-radius', radius + 'px');
-            host.style.setProperty('--ssw-font-size', fontSize + 'px');
-          }
-        }
-
-        // Preview butonu güncelle
-        const previewBtn = document.getElementById('preview-shoefit-btn');
-        if (previewBtn) {
-          previewBtn.style.background = color;
-          previewBtn.style.color = textColor;
-          previewBtn.style.borderRadius = radius + 'px';
-          previewBtn.style.fontSize = fontSize + 'px';
-          previewBtn.style.boxShadow = `0 4px 10px ${color}40`;
-        }
-
-        saveAllSettings();
-
-        if (onlyStyle) {
-          logEvent('Styles Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px' });
-          return;
-        }
-
-        if (window.reInitShoeSizeWidget) {
-          window.reInitShoeSizeWidget();
-          logEvent('Settings Applied', { color, radius: radius + 'px', fontSize: fontSize + 'px', lang, brand, preset, targetSel, insertPos });
-        }
-      }
-
-      function changeProduct(val) {
-        const sel = document.getElementById('opt-product');
-        const opt = sel.options[sel.selectedIndex];
-        
-        document.getElementById('preview-title').textContent = opt.dataset.title;
-        document.getElementById('preview-img').src = opt.dataset.img;
-        
-        const previewBrandLabel = document.getElementById('preview-brand');
-        if (previewBrandLabel) {
-          previewBrandLabel.textContent = opt.dataset.brand;
-        }
-        
-        updateEmbedCode();
-        applySettings();
-      }
-
-
-
-      function logEvent(action, detail = {}) {
-        const logBox = document.getElementById('events-log');
-        const time = new Date().toLocaleTimeString();
-        const entry = document.createElement('div');
-        entry.textContent = `[${time}] ${action} ${JSON.stringify(detail)}`;
-        logBox.appendChild(entry);
-        logBox.scrollTop = logBox.scrollHeight;
-      }
-
-      function logStoreSizeSelect(sz) {
-        logEvent('Store Size Radio Changed', { size: sz });
-      }
-
-      window.addEventListener('shoefit_widget_event', function(e) {
-        const detail = e.detail;
-        logEvent(`Widget Event: ${detail.event}`, detail);
-
-        if (detail.event === 'widget_opened') {
-          const starts = document.getElementById('kpi-starts');
-          starts.textContent = parseInt(starts.textContent) + 1;
-        } else if (detail.event === 'cta_clicked') {
-          const convs = document.getElementById('kpi-conversions');
-          convs.textContent = parseInt(convs.textContent) + 1;
-          
-          if (detail.autoSelected) {
-            const toast = document.getElementById('size-toast');
-            toast.textContent = `✓ Önerilen Beden (EU ${detail.recommendedSize}) Seçildi!`;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 4000);
-          }
-        }
-      });
-
-      async function detectSelectorsFromUrl() {
-        const urlInput = document.getElementById('opt-url-detector');
-        const statusDiv = document.getElementById('detector-status');
-        let url = urlInput.value.trim();
-        if (!url) {
-          url = window.location.origin + window.location.pathname;
-          urlInput.value = url;
-        }
-
-        statusDiv.style.display = 'block';
-        statusDiv.style.color = '#38bdf8';
-        statusDiv.textContent = 'Sayfa analiz ediliyor...';
-
-        const lowercaseUrl = url.toLowerCase();
-        let detectedSize = '';
-        let detectedCart = '';
-        let matchReason = '';
-
-        if (lowercaseUrl.includes('localhost') || lowercaseUrl.includes('127.0.0.1')) {
-          detectedSize = '.size-option-label';
-          detectedCart = '.store-btn-cart';
-          matchReason = 'Demo Mağaza altyapısı algılandı.';
-        } else if (lowercaseUrl.includes('trendyol.com')) {
-          detectedSize = '.sp-itm-attr, .variant-selector-item';
-          detectedCart = '.add-to-basket';
-          matchReason = 'Trendyol altyapısı algılandı.';
-        } else if (lowercaseUrl.includes('hepsiburada.com')) {
-          detectedSize = '.variant-property-item, [class*="variant-property"]';
-          detectedCart = '#addToCart, .add-to-cart-button';
-          matchReason = 'Hepsiburada altyapısı algılandı.';
-        } else if (lowercaseUrl.includes('nike.com')) {
-          detectedSize = 'input[name="skuAndSize"], .size-grid-button';
-          detectedCart = '.add-to-cart-btn, [data-test="add-to-cart-button"]';
-          matchReason = 'Nike E-Ticaret altyapısı algılandı.';
-        } else if (lowercaseUrl.includes('adidas.com') || lowercaseUrl.includes('adidas.com.tr')) {
-          detectedSize = '.size-selector___3A92A button, [class*="size-selector"] button';
-          detectedCart = '[data-usn="add-to-bag-button"], button.add-to-bag';
-          matchReason = 'Adidas E-Ticaret altyapısı algılandı.';
-        } else if (lowercaseUrl.includes('/products/') || lowercaseUrl.includes('.myshopify.com')) {
-          detectedSize = 'select[name="id"], .product-form__input input[type="radio"]';
-          detectedCart = 'button[name="add"], .product-form__submit';
-          matchReason = 'Shopify E-Ticaret altyapısı algılandı.';
-        }
-
-        if (detectedSize && detectedCart) {
-          applyDetectedSelectors(detectedSize, detectedCart, matchReason);
-          return;
-        }
-
-        try {
-          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-          const response = await fetch(proxyUrl);
-          if (!response.ok) throw new Error('Proxy load failed');
-          const data = await response.json();
-          const html = data.contents;
-          
-          if (!html) throw new Error('Empty page content');
-
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-
-          // Parse for size selector
-          const selects = doc.querySelectorAll('select');
-          for (const s of selects) {
-            const id = s.id ? `#${s.id}` : '';
-            const name = s.name ? `select[name="${s.name}"]` : '';
-            const className = s.className ? `.${s.className.split(' ').filter(c => c).join('.')}` : '';
-            const combined = s.className ? `select.${s.className.split(' ')[0]}` : '';
-            
-            const attributesText = (s.id + s.name + s.className).toLowerCase();
-            if (attributesText.includes('size') || attributesText.includes('beden') || attributesText.includes('numara')) {
-              detectedSize = id || name || combined || 'select';
-              break;
-            }
-          }
-
-          if (!detectedSize) {
-            const radios = doc.querySelectorAll('input[type="radio"]');
-            for (const r of radios) {
-              const nameAttr = r.name ? `input[name="${r.name}"]` : '';
-              const container = r.parentElement;
-              const attributesText = (r.name + r.id + (r.className || '')).toLowerCase();
-              if (attributesText.includes('size') || attributesText.includes('beden') || attributesText.includes('numara')) {
-                if (nameAttr) {
-                  detectedSize = nameAttr;
-                } else if (container && container.className) {
-                  detectedSize = `.${container.className.split(' ')[0]} input`;
-                } else {
-                  detectedSize = 'input[type="radio"]';
-                }
-                break;
-              }
-            }
-          }
-
-          if (!detectedSize) {
-            const containers = doc.querySelectorAll('[class*="size"], [id*="size"], [class*="beden"], [class*="numara"], [class*="swatch"]');
-            for (const container of containers) {
-              const classFirst = container.className ? `.${container.className.split(' ')[0]}` : '';
-              const idAttr = container.id ? `#${container.id}` : '';
-              const targetContainerSelector = idAttr || classFirst;
-              if (targetContainerSelector) {
-                const btn = container.querySelector('button, li, span');
-                if (btn) {
-                  detectedSize = `${targetContainerSelector} ${btn.tagName.toLowerCase()}`;
-                  break;
-                }
-              }
-            }
-          }
-
-          // Parse for cart selector
-          const buttons = doc.querySelectorAll('button, input[type="submit"], input[type="button"], a');
-          for (const btn of buttons) {
-            const text = (btn.textContent || btn.value || '').toLowerCase().trim();
-            const hasCartText = text.includes('sepete ekle') || text.includes('sepet') || text.includes('add to cart') || text.includes('add to bag') || text.includes('buy now') || text.includes('satın al');
-            
-            if (hasCartText) {
-              const id = btn.id ? `#${btn.id}` : '';
-              const name = btn.getAttribute('name') ? `button[name="${btn.getAttribute('name')}"]` : '';
-              const classFirst = btn.className ? `.${btn.className.split(' ').filter(c => c && !c.includes(':'))[0]}` : '';
-              detectedCart = id || name || `button${classFirst}` || 'button';
-              break;
-            }
-          }
-
-          if (detectedSize || detectedCart) {
-            detectedSize = detectedSize || '.size-option-label';
-            detectedCart = detectedCart || '.store-btn-cart';
-            applyDetectedSelectors(detectedSize, detectedCart, 'HTML tarama ve analiz başarılı.');
-          } else {
-            applyDetectedSelectors('.size-option-label', '.store-btn-cart', 'Eşleşen altyapı bulunamadı. Genel varsayılanlar atandı.');
-          }
-
-        } catch (err) {
-          console.warn('[Selector Detector] Fetch failed, using heuristical regex.', err);
-          applyDetectedSelectors('.size-option-label', '.store-btn-cart', 'CORS/Bağlantı hatası. Genel e-ticaret varsayılanları uygulandı.');
-        }
-      }
-
-      function applyDetectedSelectors(sizeSel, cartSel, reason) {
-        document.getElementById('opt-size-selector').value = sizeSel;
-        document.getElementById('opt-cart-selector').value = cartSel;
-        
-        const statusDiv = document.getElementById('detector-status');
-        statusDiv.style.color = '#10b981';
-        statusDiv.textContent = `✓ Başarılı: ${reason} (Beden: ${sizeSel}, Sepet: ${cartSel})`;
-        
-        updateEmbedCode();
-        applySettings();
-      }
-
-      function toggleAdvancedSettings() {
-        const panel = document.getElementById('advanced-settings-panel');
-        const arrow = document.getElementById('advanced-toggle-arrow');
-        if (panel.style.display === 'none' || panel.style.display === '') {
-          panel.style.display = 'block';
-          arrow.textContent = '▲';
-        } else {
-          panel.style.display = 'none';
-          arrow.textContent = '▼';
-        }
-      }
-
-      function copyEmbedCode() {
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        if (!targetSel) {
-          alert('Lütfen önce "Buton Konumu" alanını doldurun.');
-          return;
-        }
-        const codeText = document.getElementById('embed-code-html').innerText;
-        navigator.clipboard.writeText(codeText).then(() => {
-          alert('Kod panoya kopyalandı!');
-        });
-      }
-
-      function copyConsoleCode() {
-        const targetSel = document.getElementById('opt-target-selector').value.trim();
-        if (!targetSel) {
-          alert('Lütfen önce "Buton Konumu" alanını doldurun.');
-          return;
-        }
-        const codeText = document.getElementById('embed-code-console').innerText;
-        navigator.clipboard.writeText(codeText).then(() => {
-          alert('Konsol kodu panoya kopyalandı!');
-        });
-      }
-
-      function scrollToSidebar() {
-        const sidebar = document.querySelector('.sidebar-column');
-        if (sidebar) {
-          sidebar.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          sidebar.style.transform = 'scale(1.02)';
-          sidebar.style.transition = 'transform 0.3s ease';
-          setTimeout(() => {
-            sidebar.style.transform = 'none';
-          }, 600);
-        }
-      }
-
-      loadAllSettings();
-      updateRadiusLabel(document.getElementById('opt-radius').value);
-      updateFontSizeLabel(document.getElementById('opt-btn-font-size') ? document.getElementById('opt-btn-font-size').value : '14');
-      validateAndUpdate();
-    </script>
-  </body>
+
+      <!-- ================= KALIP VERİSİ ================= -->
+      <section class="tab" id="tab-catalog">
+        <div class="layout layout--wide">
+          <div class="note note--info" style="margin-bottom: 16px;">
+            <span class="note__icon">ℹ</span>
+            <span>
+              Bu tablolar widget'ın kullandığı verinin ta kendisidir — panel ayrı bir kopya tutmaz.
+              <strong>Kalibre</strong> işaretli markalar proje veri setinde ölçülmüş çapa değerine sahiptir;
+              <strong>türetilmiş</strong> olanlar marka ailesi ortalamasından hesaplanır ve güven skorunu düşürür.
+            </span>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title">Marka kalıpları</div>
+                <p class="card__desc">EU 42 numarasının kaç santimetreye karşılık geldiği, markalar arası farkın tek ölçüsüdür.</p>
+              </div>
+              <div class="row-inline">
+                <select class="select" id="catalog-gender" style="width: 130px;" onchange="renderCatalog()">
+                  <option value="men">Erkek</option>
+                  <option value="women">Kadın</option>
+                  <option value="kids">Çocuk</option>
+                </select>
+              </div>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Marka</th>
+                      <th>EU 42 = cm</th>
+                      <th>Genişlik</th>
+                      <th>Veri</th>
+                      <th>Kalıp notu</th>
+                    </tr>
+                  </thead>
+                  <tbody id="catalog-brands"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title">Model kalıpları</div>
+                <p class="card__desc">Sapma, modelin kendi markasının ortalamasına göre ne kadar kısa veya uzun olduğunu gösterir. Negatif değer "küçük kalıyor" demektir.</p>
+              </div>
+              <span class="badge" id="model-count">—</span>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Marka</th>
+                      <th>Model</th>
+                      <th>Sapma (cm)</th>
+                      <th>Yaklaşık numara</th>
+                      <th>Genişlik</th>
+                      <th>Not</th>
+                    </tr>
+                  </thead>
+                  <tbody id="catalog-models"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title">Beden tablosu önizlemesi</div>
+                <p class="card__desc">Seçilen marka ve kategori için widget'ın kullandığı dönüşüm tablosu.</p>
+              </div>
+              <select class="select" id="catalog-brand-select" style="width: 170px;" onchange="renderSizeTable()"></select>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="table-wrap" style="max-height: 340px;">
+                <table class="table">
+                  <thead><tr><th>EU</th><th>US</th><th>UK</th><th>Ayak uzunluğu</th></tr></thead>
+                  <tbody id="catalog-size-table"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= DOĞRULUK ================= -->
+      <section class="tab" id="tab-accuracy">
+        <div class="layout layout--wide">
+          <div class="note note--warn" style="margin-bottom: 16px;">
+            <span class="note__icon">⚠</span>
+            <span>
+              Buradaki sayılar <strong>bu tarayıcıda</strong> toplanan gerçek olaylardır — örnek veri değildir.
+              Mağaza genelinde birleştirilmiş rapor için Kurulum sekmesinde bir toplama adresi tanımlamanız gerekir.
+            </span>
+          </div>
+
+          <div class="stats" id="accuracy-stats"></div>
+
+          <div class="card" style="margin-top: 16px;">
+            <div class="card__head">
+              <div>
+                <div class="card__title">Uyum geri bildirimleri</div>
+                <p class="card__desc">Müşteri "nasıl geldi?" sorusunu yanıtladıkça motor bu markaya özel bir düzeltme öğrenir.</p>
+              </div>
+              <button class="btn btn--sm" onclick="clearFeedbackData()">Verileri temizle</button>
+            </div>
+            <div class="card__body" id="accuracy-body"></div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title">Canlı olay akışı</div>
+                <p class="card__desc">Widget'ın yaydığı <code>shoefit_widget_event</code> olayları. Aynı olaylar GTM <code>dataLayer</code>'ına da gönderilir.</p>
+              </div>
+              <button class="btn btn--sm" onclick="clearLog()">Temizle</button>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="log" id="event-log">
+                <div class="empty">
+                  <span class="empty__icon">◌</span>
+                  <span>Henüz olay yok. Test alanındaki widget'ı kullanın.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TEST ALANI ================= -->
+      <section class="tab" id="tab-sandbox">
+        <div class="layout">
+          <div>
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">Stok senaryosu</div>
+                  <p class="card__desc">Demo mağazadaki numaraların durumunu değiştirin ve widget'ın nasıl davrandığını görün.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="picker picker--3" id="stock-picker">
+                  <button class="pick is-active" data-scenario="full">
+                    <span class="pick__name">Tüm numaralar stokta</span>
+                    <span class="pick__meta">Normal durum</span>
+                  </button>
+                  <button class="pick" data-scenario="gaps">
+                    <span class="pick__name">Bazıları tükendi</span>
+                    <span class="pick__meta">En yakın numaraya geçmeli</span>
+                  </button>
+                  <button class="pick" data-scenario="narrow">
+                    <span class="pick__name">Dar beden aralığı</span>
+                    <span class="pick__meta">Yalnızca 41–43 satılıyor</span>
+                  </button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="grid-2">
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="demo-product">Demo ürün</label>
+                    <select class="select" id="demo-product" onchange="changeDemoProduct()"></select>
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label">Algılanan bağlam</label>
+                    <div id="detection-summary" style="font-size: 12.5px; color: var(--ink-3);">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">Kurulum kontrolü</div>
+                  <p class="card__desc">Widget'ın sayfada neyi bulabildiği. Kırmızı satırlar öneriyi zayıflatır.</p>
+                </div>
+                <button class="btn btn--sm" onclick="runDiagnostics()">Yeniden tara</button>
+              </div>
+              <div class="card__body">
+                <ul class="list-check" id="diagnostics"></ul>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head">
+                <div>
+                  <div class="card__title">Öneri motoru denemesi</div>
+                  <p class="card__desc">Widget'ı açmadan doğrudan motoru sorgulayın.</p>
+                </div>
+              </div>
+              <div class="card__body">
+                <div class="grid-3">
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="try-ref-brand">Referans marka</label>
+                    <select class="select" id="try-ref-brand" onchange="runTrial()"></select>
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="try-size">Numara (EU)</label>
+                    <input class="input" id="try-size" type="number" step="0.5" value="42" oninput="runTrial()" />
+                  </div>
+                  <div class="field" style="margin-top: 0;">
+                    <label class="field__label" for="try-gender">Kategori</label>
+                    <select class="select" id="try-gender" onchange="runTrial()">
+                      <option value="men">Erkek</option>
+                      <option value="women">Kadın</option>
+                      <option value="kids">Çocuk</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="divider"></div>
+                <div id="trial-result"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-col" id="preview-slot-sandbox"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= TAŞINABİLİR DEMO MAĞAZA ================= -->
+<div id="shop-portal" style="display: none;">
+  <div class="shop">
+    <div class="shop__chrome">
+      <div class="shop__lights"><span></span><span></span><span></span></div>
+      <div class="shop__url" id="demo-url">demo-magaza.com/samba-og</div>
+    </div>
+    <div class="shop__body">
+      <div class="shop__eyebrow" id="demo-brand">Adidas</div>
+      <h3 class="shop__title" id="demo-title">Adidas Samba OG</h3>
+      <div class="shop__price" id="demo-price">4.299,00 TL</div>
+
+      <div class="shop__media">
+        <img id="demo-image" src="/samba_product.png" alt="" />
+      </div>
+
+      <div class="shop__label">
+        <span>Numara seçin</span>
+        <span class="badge" id="demo-stock-badge">—</span>
+      </div>
+      <div class="sizes" id="demo-sizes"></div>
+
+      <button class="shop__cart" id="demo-cart-btn" onclick="demoAddToCart()">Sepete ekle</button>
+
+      <div class="shop__slot" id="shoefit-widget"
+        data-store-id="STORE_DEMO"
+        data-product-id="demo-1"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toast-host"></div>
+
+<script src="/shoe-size-widget.js" data-autoinit="false"></script>
+<script>
+/* ======================================================================
+   Panel mantığı
+   ====================================================================== */
+
+const SETTINGS_KEY = 'shoefit.merchant.v2';
+
+const DEMO_PRODUCTS = {
+  'samba': {
+    brand: 'Adidas', title: 'Adidas Samba OG', price: '4.299,00 TL',
+    url: 'demo-magaza.com/samba-og', image: '/samba_product.png',
+    sizes: [39, 40, 41, 42, 42.5, 43, 44, 45]
+  },
+  'airmax': {
+    brand: 'Nike', title: 'Nike Air Max 90', price: '5.749,00 TL',
+    url: 'demo-magaza.com/air-max-90', image: '',
+    sizes: [40, 41, 42, 43, 44, 45, 46]
+  },
+  'chuck': {
+    brand: 'Converse', title: 'Converse Chuck Taylor All Star', price: '2.899,00 TL',
+    url: 'demo-magaza.com/chuck-taylor', image: '',
+    sizes: [38, 39, 40, 41, 42, 43, 44]
+  },
+  'ultraboost': {
+    brand: 'Adidas', title: 'Adidas Ultraboost Kadın', price: '7.199,00 TL',
+    url: 'demo-magaza.com/ultraboost-w', image: '',
+    sizes: [36, 37, 38, 39, 40, 41]
+  }
+};
+
+const DEFAULTS = {
+  platform: 'custom',
+  target: '#demo-cart-btn',
+  position: 'after',
+  sizeSel: '#demo-sizes',
+  cartSel: '#demo-cart-btn',
+  brandSel: '#demo-brand',
+  modelSel: '#demo-title',
+  system: 'auto',
+  gender: 'auto',
+  allowCart: true,
+  endpoint: '',
+  theme: 'modern',
+  color: '#2563eb',
+  textColor: '#ffffff',
+  radius: 16,
+  font: 14,
+  label: '',
+  lang: 'auto'
+};
+
+const PLATFORM_PRESETS = {
+  custom: { sizeSel: '#demo-sizes', cartSel: '#demo-cart-btn', target: '#demo-cart-btn' },
+  shopify: { sizeSel: 'variant-radios, .product-form__input', cartSel: 'button[name="add"]', target: 'button[name="add"]' },
+  woocommerce: { sizeSel: '.variations select', cartSel: '.single_add_to_cart_button', target: '.single_add_to_cart_button' }
+};
+
+let settings = { ...DEFAULTS };
+let scenario = 'full';
+let currentProduct = 'samba';
+let soldOut = new Set();
+let eventLog = [];
+
+/* ---------------- Yardımcılar ---------------- */
+
+const $ = id => document.getElementById(id);
+
+function toast(message) {
+  const host = $('toast-host');
+  const node = document.createElement('div');
+  node.className = 'toast';
+  node.textContent = message;
+  host.appendChild(node);
+  setTimeout(() => node.remove(), 2600);
+}
+
+function fmt(value) {
+  return Number.isInteger(value) ? String(value) : String(value).replace('.', ',');
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+/* ---------------- Navigasyon ---------------- */
+
+const PAGE_META = {
+  setup: ['Kurulum', "Widget'ı mağazanıza bağlayın"],
+  appearance: ['Görünüm', 'Tema ve buton ayarları'],
+  catalog: ['Kalıp verisi', 'Motorun kullandığı marka ve model tabloları'],
+  accuracy: ['Doğruluk', 'Gerçek geri bildirim ve olay verisi'],
+  sandbox: ['Test alanı', 'Widget\'ı gerçek bir ürün sayfasında deneyin']
+};
+
+document.querySelectorAll('.nav__item').forEach(item => {
+  item.addEventListener('click', () => switchTab(item.dataset.tab, item));
+});
+
+function switchTab(tab, element) {
+  document.querySelectorAll('.nav__item').forEach(node => node.classList.toggle('is-active', node === element));
+  document.querySelectorAll('.tab').forEach(node => node.classList.toggle('is-active', node.id === `tab-${tab}`));
+
+  const [title, sub] = PAGE_META[tab] || ['', ''];
+  $('page-title').textContent = title;
+  $('page-sub').textContent = sub;
+
+  moveShopTo(tab);
+
+  if (tab === 'catalog') renderCatalog();
+  if (tab === 'accuracy') renderAccuracy();
+  if (tab === 'sandbox') { runDiagnostics(); runTrial(); }
+}
+
+/**
+ * Demo mağaza tek bir DOM düğümüdür ve sekmeler arasında taşınır.
+ * Böylece widget yeniden kurulmadan aynı örnek üzerinde çalışmaya devam eder.
+ */
+function moveShopTo(tab) {
+  const slot = $(`preview-slot-${tab}`);
+  const shop = $('shop-portal').firstElementChild || document.querySelector('.shop');
+  if (!slot || !shop) return;
+  if (shop.parentElement !== slot) slot.appendChild(shop);
+}
+
+/* ---------------- Segment kontrolleri ---------------- */
+
+function bindSegment(id, key, after) {
+  const group = $(id);
+  if (!group) return;
+  group.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', () => {
+      group.querySelectorAll('button').forEach(node => node.classList.toggle('is-active', node === button));
+      settings[key] = button.dataset.value;
+      onConfigChange();
+      if (after) after();
+    });
+  });
+}
+
+bindSegment('seg-position', 'position');
+bindSegment('seg-lang', 'lang');
+
+document.querySelectorAll('#platform-picker .pick').forEach(pick => {
+  pick.addEventListener('click', () => {
+    document.querySelectorAll('#platform-picker .pick').forEach(node => node.classList.toggle('is-active', node === pick));
+    settings.platform = pick.dataset.platform;
+
+    const preset = PLATFORM_PRESETS[settings.platform];
+    if (preset && settings.platform !== 'custom') {
+      $('cfg-size').value = preset.sizeSel;
+      $('cfg-cart').value = preset.cartSel;
+      $('cfg-target').value = preset.target;
+    } else {
+      $('cfg-size').value = DEFAULTS.sizeSel;
+      $('cfg-cart').value = DEFAULTS.cartSel;
+      $('cfg-target').value = DEFAULTS.target;
+    }
+
+    const notes = {
+      custom: 'Beden seçicisi verilmezse widget sayfayı sezgisel olarak tarar. Doğru seçiciyi vermek stok okumasını belirgin şekilde güvenilir kılar.',
+      shopify: 'Shopify varyantları ve stok durumu ürün JSON\'undan okunur; seçici yalnızca yedek olarak kullanılır.',
+      woocommerce: 'WooCommerce varyasyonları formun data-product_variations özniteliğinden okunur.'
+    };
+    $('platform-note').lastElementChild.textContent = notes[settings.platform];
+
+    onConfigChange();
+  });
+});
+
+document.querySelectorAll('#theme-picker .theme').forEach(theme => {
+  theme.addEventListener('click', () => {
+    document.querySelectorAll('#theme-picker .theme').forEach(node => node.classList.toggle('is-active', node === theme));
+    settings.theme = theme.dataset.theme;
+    onConfigChange();
+  });
+});
+
+document.querySelectorAll('#stock-picker .pick').forEach(pick => {
+  pick.addEventListener('click', () => {
+    document.querySelectorAll('#stock-picker .pick').forEach(node => node.classList.toggle('is-active', node === pick));
+    scenario = pick.dataset.scenario;
+    renderDemoSizes();
+    remountWidget();
+  });
+});
+
+/* ---------------- Ayar okuma / yazma ---------------- */
+
+function collectSettings() {
+  settings.target = $('cfg-target').value.trim();
+  settings.sizeSel = $('cfg-size').value.trim();
+  settings.cartSel = $('cfg-cart').value.trim();
+  settings.brandSel = $('cfg-brand-sel').value.trim();
+  settings.modelSel = $('cfg-model-sel').value.trim();
+  settings.system = $('cfg-system').value;
+  settings.gender = $('cfg-gender').value;
+  settings.allowCart = $('cfg-cart-allowed').checked;
+  settings.endpoint = $('cfg-endpoint').value.trim();
+  settings.color = $('cfg-color').value;
+  settings.textColor = $('cfg-text-color').value;
+  settings.radius = Number($('cfg-radius').value);
+  settings.font = Number($('cfg-font').value);
+  settings.label = $('cfg-label').value.trim();
+}
+
+function applySettingsToForm() {
+  $('cfg-target').value = settings.target;
+  $('cfg-size').value = settings.sizeSel;
+  $('cfg-cart').value = settings.cartSel;
+  $('cfg-brand-sel').value = settings.brandSel;
+  $('cfg-model-sel').value = settings.modelSel;
+  $('cfg-system').value = settings.system;
+  $('cfg-gender').value = settings.gender;
+  $('cfg-cart-allowed').checked = settings.allowCart;
+  $('cfg-endpoint').value = settings.endpoint;
+  $('cfg-color').value = settings.color;
+  $('cfg-text-color').value = settings.textColor;
+  $('cfg-radius').value = settings.radius;
+  $('cfg-font').value = settings.font;
+  $('cfg-label').value = settings.label;
+
+  $('radius-label').textContent = settings.radius + 'px';
+  $('font-label').textContent = settings.font + 'px';
+
+  const mark = (groupId, value) => {
+    document.querySelectorAll(`#${groupId} button`).forEach(node =>
+      node.classList.toggle('is-active', node.dataset.value === value));
+  };
+  mark('seg-position', settings.position);
+  mark('seg-lang', settings.lang);
+
+  document.querySelectorAll('#platform-picker .pick').forEach(node =>
+    node.classList.toggle('is-active', node.dataset.platform === settings.platform));
+  document.querySelectorAll('#theme-picker .theme').forEach(node =>
+    node.classList.toggle('is-active', node.dataset.theme === settings.theme));
+}
+
+function saveSettings(explicit) {
+  collectSettings();
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    if (explicit) toast('Ayarlar kaydedildi');
+  } catch (error) {
+    if (explicit) toast('Ayarlar kaydedilemedi');
+  }
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) settings = { ...DEFAULTS, ...JSON.parse(raw) };
+  } catch {
+    settings = { ...DEFAULTS };
+  }
+}
+
+function resetAll() {
+  settings = { ...DEFAULTS };
+  try { localStorage.removeItem(SETTINGS_KEY); } catch {}
+  applySettingsToForm();
+  onConfigChange();
+  toast('Varsayılan ayarlara dönüldü');
+}
+
+let changeTimer = null;
+
+function onConfigChange() {
+  collectSettings();
+  $('radius-label').textContent = settings.radius + 'px';
+  $('font-label').textContent = settings.font + 'px';
+
+  const hasTarget = settings.target.length > 0;
+  $('cfg-target').classList.toggle('is-error', !hasTarget);
+  $('target-error').style.display = hasTarget ? 'none' : 'block';
+
+  renderEmbedCode();
+  saveSettings(false);
+
+  clearTimeout(changeTimer);
+  changeTimer = setTimeout(remountWidget, 220);
+}
+
+/* ---------------- Kurulum kodu ---------------- */
+
+function buildAttributes() {
+  const origin = location.origin;
+  const attributes = [
+    ['data-store-id', 'STORE_1'],
+    ['data-target-selector', settings.target],
+    ['data-insert-position', settings.position]
+  ];
+
+  if (settings.sizeSel) attributes.push(['data-size-selector', settings.sizeSel]);
+  if (settings.cartSel) attributes.push(['data-cart-selector', settings.cartSel]);
+  if (settings.brandSel) attributes.push(['data-brand-selector', settings.brandSel]);
+  if (settings.modelSel) attributes.push(['data-model-selector', settings.modelSel]);
+  if (settings.system !== 'auto') attributes.push(['data-store-size-system', settings.system]);
+  if (settings.gender !== 'auto') attributes.push(['data-gender', settings.gender]);
+  if (!settings.allowCart) attributes.push(['data-allow-add-to-cart', 'false']);
+  if (settings.endpoint) attributes.push(['data-feedback-endpoint', settings.endpoint]);
+  if (settings.theme !== 'modern') attributes.push(['data-style-preset', settings.theme]);
+  if (settings.color !== DEFAULTS.color) attributes.push(['data-button-color', settings.color]);
+  if (settings.textColor !== DEFAULTS.textColor) attributes.push(['data-button-text-color', settings.textColor]);
+  if (settings.radius !== DEFAULTS.radius) attributes.push(['data-border-radius', settings.radius + 'px']);
+  if (settings.font !== DEFAULTS.font) attributes.push(['data-button-font-size', settings.font + 'px']);
+  if (settings.label) attributes.push(['data-trigger-label', settings.label]);
+  if (settings.lang !== 'auto') attributes.push(['data-language', settings.lang]);
+
+  return { origin, attributes };
+}
+
+function renderEmbedCode() {
+  const { origin, attributes } = buildAttributes();
+
+  const lines = attributes
+    .map(([name, value]) => `  <span class="tk-attr">${name}</span>=<span class="tk-str">"${escapeHtml(value)}"</span>`)
+    .join('\n');
+
+  $('embed-html').innerHTML =
+    `<span class="tk-tag">&lt;script</span>\n` +
+    `  <span class="tk-attr">src</span>=<span class="tk-str">"${origin}/shoe-size-widget.js"</span>\n` +
+    lines + '\n' +
+    `  <span class="tk-attr">async</span><span class="tk-tag">&gt;&lt;/script&gt;</span>`;
+
+  const config = {};
+  const map = {
+    'data-target-selector': 'targetSelector',
+    'data-insert-position': 'insertPosition',
+    'data-size-selector': 'sizeSelector',
+    'data-cart-selector': 'cartSelector',
+    'data-brand-selector': 'brandSelector',
+    'data-model-selector': 'modelSelector',
+    'data-store-size-system': 'storeSizeSystem',
+    'data-gender': 'gender',
+    'data-allow-add-to-cart': 'allowAddToCart',
+    'data-feedback-endpoint': 'feedbackEndpoint',
+    'data-style-preset': 'stylePreset',
+    'data-button-color': 'buttonColor',
+    'data-button-text-color': 'buttonTextColor',
+    'data-border-radius': 'borderRadius',
+    'data-button-font-size': 'buttonFontSize',
+    'data-trigger-label': 'triggerLabel',
+    'data-language': 'language'
+  };
+
+  attributes.forEach(([name, value]) => {
+    const key = map[name];
+    if (key) config[key] = value === 'false' ? false : value;
+  });
+
+  $('embed-console').innerHTML =
+    `<span class="tk-cmt">// Ürün sayfasında konsola yapıştırın</span>\n` +
+    `<span class="tk-tag">const</span> s = document.createElement(<span class="tk-str">'script'</span>);\n` +
+    `s.src = <span class="tk-str">'${origin}/shoe-size-widget.js'</span>;\n` +
+    `s.onload = () =&gt; ShoeFitWidget.init(${escapeHtml(JSON.stringify(config, null, 2))});\n` +
+    `document.head.appendChild(s);`;
+
+  const size = $('embed-html').textContent.length + $('embed-console').textContent.length;
+  $('embed-size').textContent = attributes.length + ' parametre';
+}
+
+function copyCode(id) {
+  const text = $(id).textContent;
+  navigator.clipboard.writeText(text).then(
+    () => toast('Kopyalandı'),
+    () => toast('Kopyalanamadı')
+  );
+}
+
+/* ---------------- Demo mağaza ---------------- */
+
+function changeDemoProduct() {
+  currentProduct = $('demo-product').value;
+  const product = DEMO_PRODUCTS[currentProduct];
+
+  $('demo-brand').textContent = product.brand;
+  $('demo-title').textContent = product.title;
+  $('demo-price').textContent = product.price;
+  $('demo-url').textContent = product.url;
+
+  const image = $('demo-image');
+  if (product.image) {
+    image.src = product.image;
+    image.style.display = '';
+  } else {
+    image.removeAttribute('src');
+    image.style.display = 'none';
+  }
+
+  document.title = product.title + ' · ShoeFit Panel';
+  renderDemoSizes();
+  remountWidget();
+}
+
+function renderDemoSizes() {
+  const product = DEMO_PRODUCTS[currentProduct];
+  let sizes = product.sizes;
+
+  soldOut = new Set();
+  if (scenario === 'gaps') {
+    // Ortadaki popüler numaraları tüket — en sık karşılaşılan gerçek durum.
+    sizes.forEach((size, index) => { if (index % 3 === 1) soldOut.add(size); });
+  } else if (scenario === 'narrow') {
+    sizes = sizes.filter(size => size >= 41 && size <= 43);
+  }
+
+  const container = $('demo-sizes');
+  container.innerHTML = sizes.map(size => {
+    const isSoldOut = soldOut.has(size);
+    return `<label class="${isSoldOut ? 'is-soldout' : ''}">
+      <input type="radio" name="demo-size" value="${size}" ${isSoldOut ? 'disabled' : ''} onchange="onDemoSizePick('${size}')" />
+      ${fmt(size)}
+    </label>`;
+  }).join('');
+
+  const available = sizes.length - soldOut.size;
+  $('demo-stock-badge').textContent = `${available}/${sizes.length} stokta`;
+  $('demo-stock-badge').className = 'badge ' + (available === sizes.length ? 'badge--ok' : 'badge--warn');
+}
+
+function onDemoSizePick(size) {
+  pushEvent('store_size_selected', { size });
+}
+
+function demoAddToCart() {
+  const picked = document.querySelector('input[name="demo-size"]:checked');
+  if (!picked) {
+    toast('Önce bir numara seçin');
+    return;
+  }
+  toast(`Sepete eklendi · EU ${fmt(picked.value)}`);
+  pushEvent('store_add_to_cart', { size: picked.value });
+}
+
+/* ---------------- Widget kurulumu ---------------- */
+
+function remountWidget() {
+  if (!window.ShoeFitWidget) return;
+
+  window.ShoeFitWidget.init({
+    storeId: 'STORE_DEMO',
+    productId: currentProduct,
+    targetSelector: settings.target || '#demo-cart-btn',
+    insertPosition: settings.position,
+    sizeSelector: settings.sizeSel,
+    cartSelector: settings.cartSel,
+    brandSelector: settings.brandSel,
+    modelSelector: settings.modelSel,
+    storeSizeSystem: settings.system,
+    gender: settings.gender,
+    allowAddToCart: settings.allowCart,
+    feedbackEndpoint: settings.endpoint,
+    stylePreset: settings.theme,
+    buttonColor: settings.color,
+    buttonTextColor: settings.textColor,
+    borderRadius: settings.radius + 'px',
+    buttonFontSize: settings.font + 'px',
+    triggerLabel: settings.label,
+    language: settings.lang
+  });
+
+  updateDetectionSummary();
+}
+
+function updateDetectionSummary() {
+  const engine = window.ShoeFitEngine;
+  const node = $('detection-summary');
+  if (!node || !engine) return;
+
+  const brandText = ($('demo-brand').textContent || '').trim();
+  const titleText = ($('demo-title').textContent || '').trim();
+  const model = engine.matchModel(titleText, brandText);
+
+  node.innerHTML =
+    `Marka: <strong>${escapeHtml(brandText)}</strong> · ` +
+    `Model: <strong>${model ? escapeHtml(model.name) : 'tanınmadı'}</strong>`;
+}
+
+/* ---------------- Kalıp verisi ---------------- */
+
+function renderCatalog() {
+  const engine = window.ShoeFitEngine;
+  if (!engine) return;
+
+  const gender = $('catalog-gender').value;
+
+  const qualityBadge = quality => {
+    if (quality === 'calibrated') return '<span class="badge badge--ok">Kalibre</span>';
+    if (quality === 'derived') return '<span class="badge badge--warn">Türetilmiş</span>';
+    return '<span class="badge badge--err">Jenerik</span>';
+  };
+
+  const widthText = { narrow: 'Dar', standard: 'Standart', wide: 'Geniş' };
+
+  $('catalog-brands').innerHTML = engine.brandNames.map(brand => {
+    const profile = engine.brandProfiles[brand];
+    const supported = profile.genders.includes(gender);
+    return `<tr>
+      <td><strong>${escapeHtml(profile.display)}</strong></td>
+      <td class="num">${profile.cmAtEu42.toFixed(1)} cm</td>
+      <td>${widthText[profile.widthProfile]}</td>
+      <td>${qualityBadge(profile.dataQuality)}${supported ? '' : ' <span class="badge">kategori yok</span>'}</td>
+      <td style="color: var(--ink-3);">${escapeHtml(profile.captionTr)}</td>
+    </tr>`;
+  }).join('');
+
+  const models = engine.shoeModels;
+  $('model-count').textContent = models.length + ' model';
+  $('catalog-models').innerHTML = models.map(model => {
+    const euShift = -model.lastOffsetCm / (2 / 3);
+    const shiftText = euShift === 0 ? 'tam numara' : (euShift > 0 ? '+' : '') + euShift.toFixed(1) + ' numara';
+    return `<tr>
+      <td>${escapeHtml(model.brand)}</td>
+      <td><strong>${escapeHtml(model.name)}</strong></td>
+      <td class="num" style="color: ${model.lastOffsetCm < 0 ? 'var(--err)' : model.lastOffsetCm > 0 ? 'var(--ok)' : 'var(--ink-3)'};">
+        ${model.lastOffsetCm > 0 ? '+' : ''}${model.lastOffsetCm.toFixed(1)}
+      </td>
+      <td class="num">${shiftText}</td>
+      <td>${widthText[model.widthProfile]}</td>
+      <td style="color: var(--ink-3); max-width: 320px;">${escapeHtml(model.fitNoteTr)}</td>
+    </tr>`;
+  }).join('');
+
+  const select = $('catalog-brand-select');
+  if (select.options.length === 0) {
+    select.innerHTML = engine.brandNames.map(brand => `<option value="${brand}">${brand}</option>`).join('');
+  }
+  renderSizeTable();
+}
+
+function renderSizeTable() {
+  const engine = window.ShoeFitEngine;
+  if (!engine) return;
+
+  const brand = $('catalog-brand-select').value || engine.brandNames[0];
+  const gender = $('catalog-gender').value;
+  const table = engine.getBrandTable(brand, gender);
+
+  $('catalog-size-table').innerHTML = table.map(row => `<tr>
+    <td class="num"><strong>${fmt(row.eu)}</strong></td>
+    <td class="num">${fmt(row.us)}</td>
+    <td class="num">${fmt(row.uk)}</td>
+    <td class="num">${row.cm.toFixed(1)} cm</td>
+  </tr>`).join('');
+}
+
+/* ---------------- Doğruluk ---------------- */
+
+function renderAccuracy() {
+  const engine = window.ShoeFitEngine;
+  if (!engine) return;
+
+  const stats = engine.getFeedbackStats();
+
+  $('accuracy-stats').innerHTML = `
+    <div class="stat">
+      <div class="stat__label">Üretilen öneri</div>
+      <div class="stat__value">${stats.total}</div>
+      <div class="stat__meta">bu tarayıcıda</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">Yanıtlanan</div>
+      <div class="stat__value">${stats.answered}</div>
+      <div class="stat__meta">${stats.total ? Math.round((stats.answered / stats.total) * 100) : 0}% yanıt oranı</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">Tam oturan</div>
+      <div class="stat__value">${stats.answered ? '%' + stats.accuracy : '—'}</div>
+      <div class="stat__meta">${stats.answered ? 'geri bildirime göre' : 'henüz veri yok'}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">Kayıtlı olay</div>
+      <div class="stat__value">${eventLog.length}</div>
+      <div class="stat__meta">bu oturumda</div>
+    </div>`;
+
+  const body = $('accuracy-body');
+
+  if (stats.answered === 0) {
+    body.innerHTML = `<div class="empty">
+      <span class="empty__icon">◌</span>
+      <span>Henüz yanıtlanmış geri bildirim yok.<br />
+      Test alanında bir öneri alın; bir gün sonra widget "nasıl geldi?" diye soracak.</span>
+      <button class="btn btn--sm" onclick="seedFeedbackDemo()">Örnek geri bildirim üret</button>
+    </div>`;
+    return;
+  }
+
+  const rows = [
+    ['Tam oldu', stats.byOutcome.perfect, 'ok'],
+    ['Küçük geldi', stats.byOutcome.too_small, 'warn'],
+    ['Büyük geldi', stats.byOutcome.too_large, 'err']
+  ];
+
+  const calibrations = window.ShoeFitEngine.brandNames
+    .map(brand => ({ brand, value: engine.getCalibration(brand, 'men') }))
+    .filter(item => item.value !== 0);
+
+  body.innerHTML = `
+    <div class="bars">
+      ${rows.map(([label, count, tone]) => {
+        const pct = stats.answered ? Math.round((count / stats.answered) * 100) : 0;
+        return `<div>
+          <div class="bar__top"><span>${label}</span><span>${count} · %${pct}</span></div>
+          <div class="bar__track"><div class="bar__fill bar__fill--${tone}" style="width: ${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="divider"></div>
+    <div class="field" style="margin-top: 0;">
+      <span class="field__label">Öğrenilen düzeltmeler</span>
+      ${calibrations.length === 0
+        ? '<span class="field__hint">Bir markanın düzeltme üretmesi için en az üç yanıt gerekir.</span>'
+        : calibrations.map(item =>
+            `<div class="row-inline" style="justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line-2);">
+              <span>${escapeHtml(item.brand)}</span>
+              <span class="badge ${item.value > 0 ? 'badge--warn' : 'badge--brand'}">${item.value > 0 ? '+' : ''}${item.value.toFixed(2)} cm</span>
+            </div>`).join('')}
+    </div>`;
+}
+
+function seedFeedbackDemo() {
+  // Panelin nasıl göründüğünü anlatmak için birkaç kayıt üretir.
+  // Gerçek müşteri verisiyle karışmaması için açıkça işaretlenir.
+  const outcomes = ['perfect', 'perfect', 'too_small', 'perfect', 'too_large', 'perfect'];
+  const key = 'shoefit.outcomes.v1';
+  let records = [];
+  try { records = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+
+  outcomes.forEach((outcome, index) => {
+    records.unshift({
+      id: `demo-${Date.now()}-${index}`,
+      brand: index % 2 === 0 ? 'Adidas' : 'Nike',
+      gender: 'men',
+      recommendedEu: 42 + (index % 3) * 0.5,
+      outcome,
+      storeId: 'STORE_DEMO',
+      productId: 'demo',
+      createdAt: new Date(Date.now() - 86400000 * (index + 2)).toISOString(),
+      answeredAt: new Date().toISOString()
+    });
+  });
+
+  try { localStorage.setItem(key, JSON.stringify(records)); } catch {}
+  renderAccuracy();
+  toast('Örnek geri bildirim eklendi');
+}
+
+function clearFeedbackData() {
+  try { localStorage.removeItem('shoefit.outcomes.v1'); } catch {}
+  renderAccuracy();
+  toast('Geri bildirim verileri silindi');
+}
+
+/* ---------------- Olay günlüğü ---------------- */
+
+function pushEvent(name, data) {
+  const time = new Date().toLocaleTimeString('tr-TR');
+  eventLog.unshift({ time, name, data });
+  eventLog = eventLog.slice(0, 60);
+  renderLog();
+}
+
+function renderLog() {
+  const node = $('event-log');
+  if (!node) return;
+
+  if (eventLog.length === 0) {
+    node.innerHTML = `<div class="empty"><span class="empty__icon">◌</span><span>Henüz olay yok.</span></div>`;
+    return;
+  }
+
+  node.innerHTML = eventLog.map(entry => {
+    const detail = Object.entries(entry.data || {})
+      .filter(([key]) => !['event', 'storeId', 'productId'].includes(key))
+      .map(([key, value]) => `${key}=${value}`)
+      .join(' ');
+    return `<div class="log__row">
+      <span class="log__time">${entry.time}</span>
+      <span class="log__event">${escapeHtml(entry.name)}</span>
+      <span class="log__data">${escapeHtml(detail)}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearLog() {
+  eventLog = [];
+  renderLog();
+  renderAccuracy();
+}
+
+window.addEventListener('shoefit_widget_event', event => {
+  const detail = event.detail || {};
+  pushEvent(detail.event || 'event', detail);
+});
+
+/* ---------------- Tanılama ---------------- */
+
+function runDiagnostics() {
+  const engine = window.ShoeFitEngine;
+  const checks = [];
+
+  const query = selector => {
+    if (!selector) return null;
+    try { return document.querySelector(selector); } catch { return null; }
+  };
+
+  checks.push({
+    ok: !!query(settings.target),
+    text: settings.target
+      ? `Buton konumu bulundu: <code>${escapeHtml(settings.target)}</code>`
+      : 'Buton konumu tanımlı değil — widget sayfaya eklenemez'
+  });
+
+  const sizeNode = query(settings.sizeSel);
+  const optionCount = sizeNode ? sizeNode.querySelectorAll('input[type="radio"], option, button').length : 0;
+  checks.push({
+    ok: optionCount > 0,
+    text: optionCount > 0
+      ? `Beden seçicide ${optionCount} seçenek okundu`
+      : 'Beden seçici okunamadı — stok farkındalığı devre dışı kalır'
+  });
+
+  const soldOutCount = document.querySelectorAll('#demo-sizes input:disabled').length;
+  checks.push({
+    ok: true,
+    text: soldOutCount > 0
+      ? `${soldOutCount} numara tükenmiş olarak işaretli, öneri bunları atlayacak`
+      : 'Tüm numaralar stokta görünüyor'
+  });
+
+  checks.push({
+    ok: !!query(settings.cartSel),
+    text: query(settings.cartSel)
+      ? 'Sepete ekle butonu bulundu'
+      : 'Sepete ekle butonu bulunamadı — yalnızca beden seçilir'
+  });
+
+  const brandText = (query(settings.brandSel)?.textContent || '').trim();
+  const brandKnown = engine ? engine.brandNames.some(b => brandText.toLowerCase().includes(b.toLowerCase())) : false;
+  checks.push({
+    ok: brandKnown,
+    text: brandKnown
+      ? `Marka tanındı: <strong>${escapeHtml(brandText)}</strong>`
+      : `Marka tanınamadı${brandText ? ` ("${escapeHtml(brandText)}")` : ''} — sektör ortalaması kullanılır`
+  });
+
+  const titleText = (query(settings.modelSel)?.textContent || '').trim();
+  const model = engine ? engine.matchModel(titleText, brandText) : null;
+  checks.push({
+    ok: !!model,
+    text: model
+      ? `Model tanındı: <strong>${escapeHtml(model.name)}</strong> (${model.lastOffsetCm > 0 ? '+' : ''}${model.lastOffsetCm} cm)`
+      : 'Model tanınamadı — yalnızca marka ortalaması kullanılır'
+  });
+
+  $('diagnostics').innerHTML = checks.map(check =>
+    `<li>
+      <span class="mark ${check.ok ? 'mark--ok' : 'mark--no'}">${check.ok ? '✓' : '!'}</span>
+      <span>${check.text}</span>
+    </li>`).join('');
+}
+
+/* ---------------- Motor denemesi ---------------- */
+
+function runTrial() {
+  const engine = window.ShoeFitEngine;
+  if (!engine) return;
+
+  const refBrand = $('try-ref-brand').value;
+  const gender = $('try-gender').value;
+  const size = $('try-size').value;
+
+  const offered = Array.from(document.querySelectorAll('#demo-sizes input')).map(input => Number(input.value));
+  const inStock = Array.from(document.querySelectorAll('#demo-sizes input:not(:disabled)')).map(input => Number(input.value));
+
+  const brandText = ($('demo-brand').textContent || '').trim();
+  const titleText = ($('demo-title').textContent || '').trim();
+  const model = engine.matchModel(titleText, brandText);
+
+  const result = engine.recommendSize({
+    targetBrand: brandText,
+    targetModelId: model ? model.id : undefined,
+    gender,
+    refBrand,
+    refSize: size,
+    refSystem: 'EU',
+    refFit: 'perfect',
+    offeredEuSizes: offered,
+    inStockEuSizes: inStock
+  });
+
+  const availabilityText = {
+    in_stock: '<span class="badge badge--ok"><span class="dot"></span>Stokta</span>',
+    out_of_stock: '<span class="badge badge--err"><span class="dot"></span>Stokta yok</span>',
+    not_offered: '<span class="badge badge--warn"><span class="dot"></span>Satılmıyor</span>',
+    unknown: '<span class="badge">Bilinmiyor</span>'
+  };
+
+  $('trial-result').innerHTML = `
+    <div class="row-inline" style="gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+      <div>
+        <div class="stat__label">Önerilen</div>
+        <div class="stat__value">EU ${fmt(result.recommendedEu)}</div>
+        <div style="margin-top: 4px;">${availabilityText[result.availability]}</div>
+      </div>
+      <div>
+        <div class="stat__label">Güven</div>
+        <div class="stat__value">%${result.confidence}</div>
+        <div class="stat__meta">${result.riskLevel === 'low' ? 'yüksek' : result.riskLevel === 'medium' ? 'orta' : 'düşük'}</div>
+      </div>
+      <div>
+        <div class="stat__label">Ayak ölçüsü</div>
+        <div class="stat__value">${result.footCm.toFixed(1)}</div>
+        <div class="stat__meta">cm</div>
+      </div>
+      <div>
+        <div class="stat__label">Alternatif</div>
+        <div class="stat__value">${result.alternative ? 'EU ' + fmt(result.alternative.eu) : '—'}</div>
+        <div class="stat__meta">${result.alternative ? availabilityText[result.alternative.availability].replace(/<[^>]+>/g, '') : ''}</div>
+      </div>
+    </div>
+
+    ${result.substituted
+      ? `<div class="note note--warn" style="margin-top: 14px;"><span class="note__icon">⚠</span>
+         <span>İdeal numara <strong>EU ${fmt(result.idealEu)}</strong> ancak stokta değil; en yakın numaraya geçildi.</span></div>`
+      : ''}
+
+    <div class="divider"></div>
+    <p style="font-size: 12.5px; color: var(--ink-2);">${escapeHtml(result.explanationTr)}</p>
+
+    ${result.factors.length ? `<div class="divider"></div>
+      <span class="field__label">Hesaba katılan etkenler</span>
+      <ul class="list-check" style="margin-top: 8px;">
+        ${result.factors.map(factor =>
+          `<li><span class="mark mark--ok">·</span><span>${escapeHtml(factor.labelTr)}
+           <strong style="color: ${factor.deltaEu >= 0 ? 'var(--ok)' : 'var(--err)'};">
+           ${factor.deltaEu > 0 ? '+' : ''}${factor.deltaEu} numara</strong></span></li>`).join('')}
+      </ul>` : ''}
+
+    ${result.notesTr.length ? `<div class="divider"></div>
+      <ul class="list-check">
+        ${result.notesTr.map(note => `<li><span class="mark mark--no">i</span><span>${escapeHtml(note)}</span></li>`).join('')}
+      </ul>` : ''}`;
+}
+
+/* ---------------- Başlangıç ---------------- */
+
+function boot() {
+  loadSettings();
+  applySettingsToForm();
+
+  $('demo-product').innerHTML = Object.entries(DEMO_PRODUCTS)
+    .map(([key, product]) => `<option value="${key}">${product.title}</option>`).join('');
+
+  const engine = window.ShoeFitEngine;
+  if (engine) {
+    $('try-ref-brand').innerHTML = engine.brandNames
+      .map(brand => `<option value="${brand}"${brand === 'Nike' ? ' selected' : ''}>${brand}</option>`).join('');
+  }
+
+  moveShopTo('setup');
+  changeDemoProduct();
+  renderEmbedCode();
+  renderLog();
+  renderAccuracy();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+</script>
+</body>
 </html>

@@ -1,246 +1,287 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, Root } from 'react-dom/client'
 import ShoeSizeWidget from './ShoeSizeWidget'
 import cssText from '../styles/widget.css?inline'
+import { configureFeedback, getCalibration, getFeedbackStats } from '../utils/feedback'
+import { resolveMountTarget } from '../utils/domIntegration'
+import { recommendSize } from '../utils/recommendationEngine'
+import {
+  brandNames,
+  brandProfiles,
+  getBrandDomain,
+  getBrandProfile,
+  getBrandTable
+} from '../data/brandProfiles'
+import { getModelsByBrand, matchModel, shoeModels } from '../data/models'
+import { buildSizeTable, formatSize } from '../data/sizeSystem'
+import { widgetBus } from './bus'
 
-let mounted = false
-let currentTarget: HTMLElement | null = null
-
-interface WidgetConfig {
+export interface WidgetConfig {
   storeId: string
   productId: string
   brand: string
   model: string
-  sizeSystem: string
+  gender: string
+  language: string
+  stylePreset: string
   buttonColor: string
   buttonTextColor: string
   borderRadius: string
   buttonFontSize: string
-  language: string
-  stylePreset: string
+  triggerLabel: string
+  targetSelector: string
+  insertPosition: 'before' | 'after'
   sizeSelector: string
   cartSelector: string
   brandSelector: string
-  showAddToCart: string
-  showSelectSize: string
-  targetSelector: string
-  insertPosition: string
+  modelSelector: string
+  storeSizeSystem: string
+  allowAddToCart: boolean
+  feedbackEndpoint: string
+  embedded: boolean
 }
 
-function injectIntoShadow(rootEl: HTMLElement, config: Partial<WidgetConfig>, openOnMount = false, initialStep = 1) {
-  // Create wrapper
+interface Instance {
+  host: HTMLElement
+  root: Root
+}
+
+let instance: Instance | null = null
+
+const DEFAULTS: WidgetConfig = {
+  storeId: 'STORE_1',
+  productId: '',
+  brand: '',
+  model: '',
+  gender: 'auto',
+  language: 'auto',
+  stylePreset: 'modern',
+  buttonColor: '#2563eb',
+  buttonTextColor: '#ffffff',
+  borderRadius: '16px',
+  buttonFontSize: '14px',
+  triggerLabel: '',
+  targetSelector: '',
+  insertPosition: 'after',
+  sizeSelector: '',
+  cartSelector: '',
+  brandSelector: '',
+  modelSelector: '',
+  storeSizeSystem: 'auto',
+  allowAddToCart: true,
+  feedbackEndpoint: '',
+  embedded: false
+}
+
+function toBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') return fallback
+  return value !== 'false' && value !== '0'
+}
+
+/**
+ * Yapılandırma öncelik sırası:
+ * 1. init() ile verilen nesne
+ * 2. #shoefit-widget kabındaki data-* öznitelikleri
+ * 3. script etiketindeki data-* öznitelikleri
+ * 4. varsayılanlar
+ */
+function readConfig(override?: Partial<WidgetConfig>): WidgetConfig {
+  const script =
+    (document.currentScript as HTMLScriptElement | null) ||
+    (document.querySelector('script[data-store-id]') as HTMLScriptElement | null) ||
+    (document.querySelector('script[src*="shoe-size-widget"]') as HTMLScriptElement | null)
+
+  const container = document.getElementById('shoefit-widget')
+  const scriptData = script?.dataset ?? {}
+
+  const read = (attribute: string, datasetKey: string): string | undefined =>
+    container?.getAttribute(attribute) ?? scriptData[datasetKey]
+
+  return {
+    storeId: override?.storeId ?? read('data-store-id', 'storeId') ?? DEFAULTS.storeId,
+    productId: override?.productId ?? read('data-product-id', 'productId') ?? DEFAULTS.productId,
+    brand: override?.brand ?? read('data-brand', 'brand') ?? DEFAULTS.brand,
+    model: override?.model ?? read('data-model', 'model') ?? DEFAULTS.model,
+    gender: override?.gender ?? read('data-gender', 'gender') ?? DEFAULTS.gender,
+    language: override?.language ?? read('data-language', 'language') ?? DEFAULTS.language,
+    stylePreset: override?.stylePreset ?? read('data-style-preset', 'stylePreset') ?? DEFAULTS.stylePreset,
+    buttonColor: override?.buttonColor ?? read('data-button-color', 'buttonColor') ?? DEFAULTS.buttonColor,
+    buttonTextColor:
+      override?.buttonTextColor ?? read('data-button-text-color', 'buttonTextColor') ?? DEFAULTS.buttonTextColor,
+    borderRadius: override?.borderRadius ?? read('data-border-radius', 'borderRadius') ?? DEFAULTS.borderRadius,
+    buttonFontSize:
+      override?.buttonFontSize ?? read('data-button-font-size', 'buttonFontSize') ?? DEFAULTS.buttonFontSize,
+    triggerLabel: override?.triggerLabel ?? read('data-trigger-label', 'triggerLabel') ?? DEFAULTS.triggerLabel,
+    targetSelector:
+      override?.targetSelector ?? read('data-target-selector', 'targetSelector') ?? DEFAULTS.targetSelector,
+    insertPosition:
+      (override?.insertPosition ??
+        (read('data-insert-position', 'insertPosition') as WidgetConfig['insertPosition'])) ||
+      DEFAULTS.insertPosition,
+    sizeSelector: override?.sizeSelector ?? read('data-size-selector', 'sizeSelector') ?? DEFAULTS.sizeSelector,
+    cartSelector: override?.cartSelector ?? read('data-cart-selector', 'cartSelector') ?? DEFAULTS.cartSelector,
+    brandSelector: override?.brandSelector ?? read('data-brand-selector', 'brandSelector') ?? DEFAULTS.brandSelector,
+    modelSelector: override?.modelSelector ?? read('data-model-selector', 'modelSelector') ?? DEFAULTS.modelSelector,
+    storeSizeSystem:
+      override?.storeSizeSystem ?? read('data-store-size-system', 'storeSizeSystem') ?? DEFAULTS.storeSizeSystem,
+    allowAddToCart:
+      override?.allowAddToCart ?? toBoolean(read('data-allow-add-to-cart', 'allowAddToCart'), DEFAULTS.allowAddToCart),
+    feedbackEndpoint:
+      override?.feedbackEndpoint ?? read('data-feedback-endpoint', 'feedbackEndpoint') ?? DEFAULTS.feedbackEndpoint,
+    embedded: override?.embedded ?? toBoolean(read('data-embedded', 'embedded'), DEFAULTS.embedded)
+  }
+}
+
+function findAnchor(config: WidgetConfig): HTMLElement | null {
+  if (config.embedded) return document.getElementById('shoefit-widget')
+  return resolveMountTarget(config.targetSelector)
+}
+
+function mount(config: WidgetConfig, anchor: HTMLElement): void {
   const host = document.createElement('div')
   host.dataset.sswHost = 'true'
+  host.setAttribute('data-preset', config.stylePreset || 'modern')
   host.style.display = 'block'
   host.style.width = '100%'
-  if (config.storeId === 'STORE_DEMO') {
-    host.setAttribute('data-is-demo', 'true')
-  }
+  host.style.setProperty('--sf-accent', config.buttonColor)
+  host.style.setProperty('--sf-on-accent', config.buttonTextColor)
+  host.style.setProperty('--sf-radius', config.borderRadius)
+  host.style.setProperty('--sf-font-size', config.buttonFontSize)
 
-  // Apply theme variables to host
-  const primaryColor = config.buttonColor || '#2563eb'
-  const textColor = config.buttonTextColor || '#ffffff'
-  const radius = config.borderRadius || '16px'
-  const fontSize = config.buttonFontSize || '14px'
-
-  host.style.setProperty('--ssw-primary', primaryColor)
-  host.style.setProperty('--ssw-text-on-primary', textColor)
-  host.style.setProperty('--ssw-radius', radius)
-  host.style.setProperty('--ssw-font-size', fontSize)
-
-  // Attach Shadow DOM for CSS isolation
   const shadow = host.attachShadow({ mode: 'open' })
-  
-  // Inject widget CSS styles
   const style = document.createElement('style')
   style.textContent = cssText
   shadow.appendChild(style)
 
-  // Mount point
-  const mount = document.createElement('div')
-  shadow.appendChild(mount)
+  const mountPoint = document.createElement('div')
+  shadow.appendChild(mountPoint)
 
-  // Inject host into page based on configuration
-  if (config.storeId === 'STORE_DEMO' || rootEl === document.body) {
-    rootEl.appendChild(host)
+  if (config.embedded || anchor === document.body || !anchor.parentNode) {
+    anchor.appendChild(host)
+  } else if (config.insertPosition === 'before') {
+    anchor.parentNode.insertBefore(host, anchor)
   } else {
-    const parent = rootEl.parentNode
-    if (parent) {
-      if (config.insertPosition === 'before') {
-        parent.insertBefore(host, rootEl)
-      } else {
-        parent.insertBefore(host, rootEl.nextSibling)
-      }
-    } else {
-      rootEl.appendChild(host)
-    }
+    anchor.parentNode.insertBefore(host, anchor.nextSibling)
   }
 
-  // Render React App
-  const root = createRoot(mount)
+  const root = createRoot(mountPoint)
   root.render(
     React.createElement(ShoeSizeWidget, {
-      storeId: config.storeId || 'default-store',
-      productId: config.productId || 'default-prod',
-      targetBrand: config.brand || 'Nike',
-      targetModel: config.model || '',
-      targetSizeSystem: config.sizeSystem || 'EU',
-      languageMode: config.language || 'auto',
-      stylePreset: config.stylePreset || 'modern',
-      sizeSelector: config.sizeSelector || '',
-      cartSelector: config.cartSelector || '',
-      brandSelector: config.brandSelector || '',
-      showAddToCart: config.showAddToCart || 'true',
-      showSelectSize: config.showSelectSize || 'true',
-      initialOpen: openOnMount,
-      initialStep: initialStep
+      storeId: config.storeId,
+      productId: config.productId,
+      targetBrand: config.brand,
+      targetModel: config.model,
+      gender: config.gender,
+      languageMode: config.language,
+      sizeSelector: config.sizeSelector,
+      cartSelector: config.cartSelector,
+      brandSelector: config.brandSelector,
+      modelSelector: config.modelSelector,
+      storeSizeSystem: config.storeSizeSystem,
+      allowAddToCart: config.allowAddToCart,
+      embedded: config.embedded,
+      triggerLabel: config.triggerLabel
     })
   )
-  mounted = true
+
+  instance = { host, root }
 }
 
-function findInsertTarget(targetSelector?: string) {
-  // Try to find target selector configured
-  if (targetSelector) {
-    try {
-      const el = document.querySelector(targetSelector)
-      if (el) return el as HTMLElement
-    } catch (e) {
-      console.warn('[ShoeFit] Invalid target selector syntax:', targetSelector, e)
-    }
+function destroy(): void {
+  widgetBus.reset()
+  if (!instance) return
+  try {
+    instance.root.unmount()
+  } catch {
+    /* unmount sırasında hata akışı durdurmamalı */
   }
-
-  // Try to find the developer-configured container element
-  const container = document.getElementById('shoefit-widget')
-  if (container) return container
-
-  // Fallback to searching for size selects on the page
-  const selectors = ['select[name*="size"]', 'select[id*="size"]', 'select']
-  for (const selector of selectors) {
-    try {
-      const el = document.querySelector(selector)
-      if (el && el.parentElement) return el.parentElement as HTMLElement
-    } catch {}
-  }
-
-  return document.body
+  instance.host.remove()
+  instance = null
 }
 
-function openWidget() {
-  window.dispatchEvent(new CustomEvent('shoefit_open_widget'))
-}
+/** Merchant elle init() çağırdıysa otomatik başlatma devreye girmemeli. */
+let manuallyInitialised = false
 
-function reInit(openOnMount = false) {
-  let wasOpen = openOnMount
-  let lastStep = 1
-  if (currentTarget) {
-    const host = currentTarget.querySelector('[data-ssw-host]') || document.querySelector('[data-ssw-host]')
-    if (host && host.shadowRoot) {
-      const drawer = host.shadowRoot.querySelector('.ssw-drawer')
-      if (drawer && drawer.classList.contains('open')) {
-        wasOpen = true
-      }
-      const activeStepEl = host.shadowRoot.querySelector('.ssw-step.active')
-      if (activeStepEl) {
-        const steps = Array.from(host.shadowRoot.querySelectorAll('.ssw-step'))
-        const idx = steps.indexOf(activeStepEl)
-        if (idx !== -1) {
-          lastStep = idx + 1
-        }
-      }
-    }
-    if (host) host.remove()
+function init(override?: Partial<WidgetConfig>): void {
+  const config = readConfig(override)
+  configureFeedback(config.feedbackEndpoint)
+
+  // Hedefi mevcut kurulumu bozmadan önce çöz: bulunamıyorsa çalışan widget'ı
+  // yıkmaktansa olduğu gibi bırakmak doğrudur.
+  const anchor = findAnchor(config)
+  if (!anchor) {
+    console.warn(
+      '[ShoeFit] Butonun ekleneceği element bulunamadı. data-target-selector verin veya sayfaya #shoefit-widget ekleyin.'
+    )
+    return
   }
-  mounted = false
-  init(wasOpen, lastStep)
-}
 
-function init(openOnMount = false, initialStep = 1, forceConfig?: Partial<WidgetConfig>) {
-  // Avoid double mounting (unless force config provided)
-  if (!forceConfig && mounted && document.querySelector('[data-ssw-host]')) return
-
-  // Gather config parameters from script and div container
-  // NOTE: document.currentScript is null in ES modules - use querySelector fallback
-  const script = (document.currentScript as HTMLScriptElement | null) ||
-                 (document.querySelector('script[data-store-id]') as HTMLScriptElement | null) ||
-                 (document.querySelector('script[src*="shoe-size-widget"]') as HTMLScriptElement | null)
-  const scriptDataset = script?.dataset || {}
-
-  // Check target-selector
-  const divContainer = document.getElementById('shoefit-widget')
-  const targetSelector = forceConfig?.targetSelector || divContainer?.getAttribute('data-target-selector') || scriptDataset.targetSelector || ''
-  const insertPosition = forceConfig?.insertPosition || divContainer?.getAttribute('data-insert-position') || scriptDataset.insertPosition || 'after'
-
-  const storeId = forceConfig?.storeId || divContainer?.getAttribute('data-store-id') || scriptDataset.storeId || 'STORE_1'
-  const target = (storeId === 'STORE_DEMO') ? (document.getElementById('shoefit-widget') || document.body) : findInsertTarget(targetSelector)
-  if (!target) return
-  currentTarget = target
-
-  // Preference order: 1. forceConfig, 2. Div container attributes, 3. Script attributes, 4. Defaults
-  const productId = forceConfig?.productId || divContainer?.getAttribute('data-product-id') || scriptDataset.productId || 'PRODUCT_1'
-  const brand = forceConfig?.brand || divContainer?.getAttribute('data-brand') || scriptDataset.brand || 'Nike'
-  const model = forceConfig?.model || divContainer?.getAttribute('data-model') || scriptDataset.model || 'Air Force 1'
-  const sizeSystem = forceConfig?.sizeSystem || divContainer?.getAttribute('data-size-system') || scriptDataset.sizeSystem || 'EU'
-  const buttonColor = forceConfig?.buttonColor || divContainer?.getAttribute('data-button-color') || scriptDataset.buttonColor || '#2563eb'
-  const buttonTextColor = forceConfig?.buttonTextColor || divContainer?.getAttribute('data-button-text-color') || scriptDataset.buttonTextColor || '#ffffff'
-  const borderRadius = forceConfig?.borderRadius || divContainer?.getAttribute('data-border-radius') || scriptDataset.borderRadius || '16px'
-  const buttonFontSize = forceConfig?.buttonFontSize || divContainer?.getAttribute('data-button-font-size') || scriptDataset.buttonFontSize || '14px'
-  const language = forceConfig?.language || divContainer?.getAttribute('data-language') || scriptDataset.language || 'auto'
-  const stylePreset = forceConfig?.stylePreset || divContainer?.getAttribute('data-style-preset') || scriptDataset.stylePreset || 'modern'
-  const sizeSelector = forceConfig?.sizeSelector || divContainer?.getAttribute('data-size-selector') || scriptDataset.sizeSelector || ''
-  const cartSelector = forceConfig?.cartSelector || divContainer?.getAttribute('data-cart-selector') || scriptDataset.cartSelector || ''
-  const brandSelector = forceConfig?.brandSelector || divContainer?.getAttribute('data-brand-selector') || scriptDataset.brandSelector || ''
-  const showAddToCart = forceConfig?.showAddToCart || divContainer?.getAttribute('data-show-add-to-cart') || scriptDataset.showAddToCart || 'true'
-  const showSelectSize = forceConfig?.showSelectSize || divContainer?.getAttribute('data-show-select-size') || scriptDataset.showSelectSize || 'true'
-
-  const config: Partial<WidgetConfig> = {
-    storeId,
-    productId,
-    brand,
-    model,
-    sizeSystem,
-    buttonColor,
-    buttonTextColor,
-    borderRadius,
-    buttonFontSize,
-    language,
-    stylePreset,
-    sizeSelector,
-    cartSelector,
-    brandSelector,
-    showAddToCart,
-    showSelectSize,
-    targetSelector,
-    insertPosition
-  }
+  destroy()
 
   try {
-    injectIntoShadow(target, config, openOnMount, initialStep)
+    mount(config, anchor)
   } catch (error) {
-    console.error('ShoeFitWidget injection failed:', error)
+    console.error('[ShoeFit] Widget yüklenemedi:', error)
   }
-
-  // Bind trigger actions to window scope
-  ;(window as any).openShoeSizeWidget = openWidget
-  ;(window as any).reInitShoeSizeWidget = reInit
 }
 
-// Allow direct initialization via window.ShoeFitWidget.init(config)
-;(window as any).ShoeFitWidget = {
-  init: (config: Partial<WidgetConfig>) => {
-    // Remove existing widget if present
-    const existing = document.querySelector('[data-ssw-host]')
-    if (existing) existing.remove()
-    mounted = false
-    init(false, 1, config)
+const api = {
+  init: (override?: Partial<WidgetConfig>) => {
+    manuallyInitialised = true
+    init(override)
   },
-  open: openWidget,
-  reInit
+  destroy,
+  open: () => widgetBus.open(),
+  close: () => widgetBus.close(),
+  /** SPA yönlendirmelerinden sonra ürün değiştiyse yeniden kurar. */
+  refresh: (override?: Partial<WidgetConfig>) => {
+    manuallyInitialised = true
+    init(override)
+  },
+  version: '2.0.0'
 }
 
-// Initialize on page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => init(true))
-} else {
-  init(true)
+;(window as any).ShoeFitWidget = api
+
+/**
+ * Motorun kendisi de dışa açılır. Landing sayfası ve merchant paneli beden
+ * hesabını buradan yapar; böylece marka/model verisinin ikinci bir kopyası
+ * HTML içinde yaşamaz.
+ */
+;(window as any).ShoeFitEngine = {
+  recommendSize,
+  brandProfiles,
+  brandNames,
+  getBrandProfile,
+  getBrandTable,
+  getBrandDomain,
+  shoeModels,
+  getModelsByBrand,
+  matchModel,
+  buildSizeTable,
+  formatSize,
+  getFeedbackStats,
+  getCalibration
 }
+
+function shouldAutoInit(): boolean {
+  const script =
+    (document.currentScript as HTMLScriptElement | null) ||
+    (document.querySelector('script[src*="shoe-size-widget"]') as HTMLScriptElement | null)
+  return script?.dataset.autoinit !== 'false'
+}
+
+function autoInit(): void {
+  if (manuallyInitialised) return
+  init()
+}
+
+if (shouldAutoInit()) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoInit)
+  } else {
+    autoInit()
+  }
+}
+
+export default api
